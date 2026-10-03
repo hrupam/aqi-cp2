@@ -1,0 +1,2657 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkpoint 2 Walkthrough – Kolkata PM2.5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --ink:#1B2A41; --sky:#EEF3F8; --paper:#FFFFFF; --haze:#66788F; --line:#DCE3EC; --signal:#2F6FDE;
+  --code-bg:#F5F8FB; --tint:#E6EEF8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --ink:#E4EAF2; --sky:#0F1724; --paper:#162133; --haze:#9AA9BD;
+    --line:#2A3850; --signal:#6E9BF0; --code-bg:#111B2B; --tint:#1C2A40; }
+}
+:root[data-theme="dark"] { --ink:#E4EAF2; --sky:#0F1724; --paper:#162133; --haze:#9AA9BD;
+    --line:#2A3850; --signal:#6E9BF0; --code-bg:#111B2B; --tint:#1C2A40; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin:0; background:var(--sky); color:var(--ink);
+  font-family:'Atkinson Hyperlegible','Segoe UI',sans-serif; font-size:17px; line-height:1.65; }
+.layout { display:grid; grid-template-columns: 300px minmax(0,1fr); max-width:1320px; margin:0 auto; }
+nav { position:sticky; top:0; height:100vh; overflow-y:auto; padding:28px 18px 40px 24px;
+  border-right:1px solid var(--line); font-size:.9rem; }
+nav .brand { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:1.15rem; line-height:1.2; margin-bottom:4px; }
+nav .sub { color:var(--haze); font-size:.82rem; margin-bottom:18px; }
+nav ul { list-style:none; padding-left:0; margin:0; }
+nav ul ul { padding-left:14px; margin:2px 0 8px; display:none; }
+nav li.open > ul { display:block; }
+nav a { color:var(--ink); text-decoration:none; display:block; padding:3px 8px; border-radius:6px; }
+nav ul ul a { color:var(--haze); font-size:.84rem; padding:2px 8px; }
+nav a:hover { background:var(--tint); }
+nav a.active { background:var(--tint); color:var(--signal); font-weight:700; }
+main { padding:40px 56px 120px; min-width:0; }
+main > * { max-width:860px; }
+main > table, main > div.hl, main > pre { max-width:100%; }
+h1 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:clamp(2rem,3.6vw,2.9rem);
+  line-height:1.08; letter-spacing:-.02em; margin:0 0 18px; }
+h2 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:1.75rem; letter-spacing:-.01em;
+  margin:64px 0 14px; padding-top:18px; border-top:3px solid var(--ink); scroll-margin-top:16px; }
+h3 { font-family:'Bricolage Grotesque',sans-serif; font-weight:600; font-size:1.25rem; margin:36px 0 10px;
+  scroll-margin-top:16px; }
+p, li { max-width:78ch; }
+a { color:var(--signal); }
+hr { display:none; }
+strong { font-weight:700; }
+code { font-family:'JetBrains Mono',Consolas,monospace; font-size:.86em; background:var(--code-bg);
+  border:1px solid var(--line); border-radius:4px; padding:.05em .3em; }
+pre code, .hl code { border:0; background:none; padding:0; font-size:.84rem; }
+.hl, pre { background:var(--code-bg) !important; border:1px solid var(--line); border-radius:10px;
+  padding:14px 16px; overflow-x:auto; line-height:1.45; }
+.hl pre { margin:0; padding:0; border:0; background:none !important; }
+table { border-collapse:collapse; width:100%; margin:14px 0 22px; font-size:.92rem; background:var(--paper);
+  border:1px solid var(--line); border-radius:10px; overflow:hidden; display:block; overflow-x:auto; }
+th, td { text-align:left; vertical-align:top; padding:8px 12px; border-bottom:1px solid var(--line); }
+th { background:var(--tint); font-weight:700; white-space:nowrap; }
+tr:last-child td { border-bottom:0; }
+blockquote { margin:18px 0; padding:10px 18px; background:var(--paper); border-left:4px solid var(--signal);
+  border-radius:0 8px 8px 0; }
+blockquote p { margin:6px 0; }
+.katex-display { overflow-x:auto; overflow-y:hidden; padding:6px 0; }
+.toolbar { position:fixed; right:18px; bottom:18px; display:flex; gap:8px; }
+.toolbar button { font:inherit; font-size:.85rem; padding:7px 12px; border-radius:999px; border:1px solid var(--line);
+  background:var(--paper); color:var(--ink); cursor:pointer; }
+.toolbar button:focus-visible, nav a:focus-visible { outline:2px solid var(--signal); outline-offset:2px; }
+pre { line-height: 125%; }
+td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.hl .hll { background-color: #ffffcc }
+.hl { background: #f0f0f0; }
+.hl .c { color: #60A0B0; font-style: italic } /* Comment */
+.hl .err { border: 1px solid #F00 } /* Error */
+.hl .k { color: #007020; font-weight: bold } /* Keyword */
+.hl .o { color: #666 } /* Operator */
+.hl .ch { color: #60A0B0; font-style: italic } /* Comment.Hashbang */
+.hl .cm { color: #60A0B0; font-style: italic } /* Comment.Multiline */
+.hl .cp { color: #007020 } /* Comment.Preproc */
+.hl .cpf { color: #60A0B0; font-style: italic } /* Comment.PreprocFile */
+.hl .c1 { color: #60A0B0; font-style: italic } /* Comment.Single */
+.hl .cs { color: #60A0B0; background-color: #FFF0F0 } /* Comment.Special */
+.hl .gd { color: #A00000 } /* Generic.Deleted */
+.hl .ge { font-style: italic } /* Generic.Emph */
+.hl .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.hl .gr { color: #F00 } /* Generic.Error */
+.hl .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.hl .gi { color: #00A000 } /* Generic.Inserted */
+.hl .go { color: #888 } /* Generic.Output */
+.hl .gp { color: #C65D09; font-weight: bold } /* Generic.Prompt */
+.hl .gs { font-weight: bold } /* Generic.Strong */
+.hl .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.hl .gt { color: #04D } /* Generic.Traceback */
+.hl .kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.hl .kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.hl .kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.hl .kp { color: #007020 } /* Keyword.Pseudo */
+.hl .kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.hl .kt { color: #902000 } /* Keyword.Type */
+.hl .m { color: #40A070 } /* Literal.Number */
+.hl .s { color: #4070A0 } /* Literal.String */
+.hl .na { color: #4070A0 } /* Name.Attribute */
+.hl .nb { color: #007020 } /* Name.Builtin */
+.hl .nc { color: #0E84B5; font-weight: bold } /* Name.Class */
+.hl .no { color: #60ADD5 } /* Name.Constant */
+.hl .nd { color: #555; font-weight: bold } /* Name.Decorator */
+.hl .ni { color: #D55537; font-weight: bold } /* Name.Entity */
+.hl .ne { color: #007020 } /* Name.Exception */
+.hl .nf { color: #06287E } /* Name.Function */
+.hl .nl { color: #002070; font-weight: bold } /* Name.Label */
+.hl .nn { color: #0E84B5; font-weight: bold } /* Name.Namespace */
+.hl .nt { color: #062873; font-weight: bold } /* Name.Tag */
+.hl .nv { color: #BB60D5 } /* Name.Variable */
+.hl .ow { color: #007020; font-weight: bold } /* Operator.Word */
+.hl .w { color: #BBB } /* Text.Whitespace */
+.hl .mb { color: #40A070 } /* Literal.Number.Bin */
+.hl .mf { color: #40A070 } /* Literal.Number.Float */
+.hl .mh { color: #40A070 } /* Literal.Number.Hex */
+.hl .mi { color: #40A070 } /* Literal.Number.Integer */
+.hl .mo { color: #40A070 } /* Literal.Number.Oct */
+.hl .sa { color: #4070A0 } /* Literal.String.Affix */
+.hl .sb { color: #4070A0 } /* Literal.String.Backtick */
+.hl .sc { color: #4070A0 } /* Literal.String.Char */
+.hl .dl { color: #4070A0 } /* Literal.String.Delimiter */
+.hl .sd { color: #4070A0; font-style: italic } /* Literal.String.Doc */
+.hl .s2 { color: #4070A0 } /* Literal.String.Double */
+.hl .se { color: #4070A0; font-weight: bold } /* Literal.String.Escape */
+.hl .sh { color: #4070A0 } /* Literal.String.Heredoc */
+.hl .si { color: #70A0D0; font-style: italic } /* Literal.String.Interpol */
+.hl .sx { color: #C65D09 } /* Literal.String.Other */
+.hl .sr { color: #235388 } /* Literal.String.Regex */
+.hl .s1 { color: #4070A0 } /* Literal.String.Single */
+.hl .ss { color: #517918 } /* Literal.String.Symbol */
+.hl .bp { color: #007020 } /* Name.Builtin.Pseudo */
+.hl .fm { color: #06287E } /* Name.Function.Magic */
+.hl .vc { color: #BB60D5 } /* Name.Variable.Class */
+.hl .vg { color: #BB60D5 } /* Name.Variable.Global */
+.hl .vi { color: #BB60D5 } /* Name.Variable.Instance */
+.hl .vm { color: #BB60D5 } /* Name.Variable.Magic */
+.hl .il { color: #40A070 } /* Literal.Number.Integer.Long */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hl * { color: inherit !important; } }
+:root[data-theme="dark"] .hl * { color: inherit !important; }
+@media (max-width: 900px) {
+  .layout { display:block; }
+  nav { position:static; height:auto; border-right:0; border-bottom:1px solid var(--line); padding:18px 16px; }
+  nav ul ul { display:none !important; }
+  main { padding:24px 16px 80px; }
+  body { font-size:16px; }
+}
+@media print {
+  nav, .toolbar { display:none; } .layout { display:block; } main { padding:0; }
+  h2 { break-before:page; } body { background:#fff; color:#000; font-size:11pt; }
+}
+</style></head>
+<body>
+<div class="layout">
+<nav aria-label="Contents">
+  <div class="brand">Kolkata Air Quality Early Warning</div>
+  <div class="sub">Checkpoint 2: project &amp; code walkthrough</div>
+  <div class="toc">
+<ul>
+<li><a href="#1-the-problem">1. The problem</a><ul>
+<li><a href="#1-1-what-pm2-5-is-and-why-it-matters">1.1 What PM2.5 is and why it matters</a></li>
+<li><a href="#1-2-why-forecast-it">1.2 Why forecast it?</a></li>
+<li><a href="#1-3-the-project-s-three-objectives">1.3 The project's three objectives</a></li>
+<li><a href="#1-4-what-google-weather-doesn-t-provide">1.4 What "Google Weather doesn't provide"</a></li>
+</ul>
+</li>
+<li><a href="#2-the-system-at-a-glance">2. The system at a glance</a><ul>
+<li><a href="#2-1-architecture">2.1 Architecture</a></li>
+<li><a href="#2-2-folder-layout">2.2 Folder layout</a></li>
+<li><a href="#2-3-technology-choices">2.3 Technology choices</a></li>
+<li><a href="#2-4-gaps-in-weather-apps-and-where-the-code-fills-them">2.4 Gaps in weather apps and where the code fills them</a></li>
+</ul>
+</li>
+<li><a href="#3-what-happens-when-you-run-it-end-to-end-flows">3. What happens when you run it (end-to-end flows)</a><ul>
+<li><a href="#3-1-python-pipeline-py-all">3.1 python pipeline.py all</a></li>
+<li><a href="#3-2-python-pipeline-py-update">3.2 python pipeline.py update</a></li>
+<li><a href="#3-3-opening-the-dashboard-streamlit-run-app-py">3.3 Opening the dashboard (streamlit run app.py)</a></li>
+<li><a href="#3-4-when-the-station-goes-silent">3.4 When the station goes silent</a></li>
+</ul>
+</li>
+<li><a href="#4-data-sources-in-detail">4. Data sources in detail</a><ul>
+<li><a href="#4-1-openaq-v3-station-measurements">4.1 OpenAQ v3 (station measurements)</a></li>
+<li><a href="#4-2-open-meteo-weather-and-cams-free-no-key">4.2 Open-Meteo (weather and CAMS): free, no key</a></li>
+<li><a href="#4-3-cams">4.3 CAMS</a></li>
+</ul>
+</li>
+<li><a href="#5-config-py-settings">5. config.py: settings</a><ul>
+<li><a href="#5-1-load-dotenv">5.1 _load_dotenv()</a></li>
+<li><a href="#5-2-constants">5.2 Constants</a></li>
+</ul>
+</li>
+<li><a href="#6-data-clients">6. Data clients</a><ul>
+<li><a href="#6-1-aq-openaq-py-openaq-v3-client">6.1 aq/openaq.py: OpenAQ v3 client</a></li>
+<li><a href="#6-2-aq-openmeteo-py-weather-and-cams-client">6.2 aq/openmeteo.py: weather and CAMS client</a></li>
+</ul>
+</li>
+<li><a href="#7-aq-dataset-py-quality-control-merging-outage-bridging">7. aq/dataset.py: quality control, merging, outage bridging</a><ul>
+<li><a href="#7-1-clean-pm25-pm-min-coverage-50-series-report">7.1 clean_pm25(pm, min_coverage=50) → (series, report)</a></li>
+<li><a href="#7-2-merge-sources-pm-weather-cams-dataframe">7.2 merge_sources(pm, weather, cams) → DataFrame</a></li>
+<li><a href="#7-3-bridge-gap-df-now-min-gap-h-6-max-gap-days-14-df-info">7.3 bridge_gap(df, now, min_gap_h=6, max_gap_days=14) → (df, info)</a></li>
+</ul>
+</li>
+<li><a href="#8-pipeline-py-the-command-line-orchestrator">8. pipeline.py: the command-line orchestrator</a><ul>
+<li><a href="#8-1-small-helpers">8.1 Small helpers</a></li>
+<li><a href="#8-2-fetch-location-openaq-loc-sensors-history-join-one-station-s-sensors">8.2 _fetch_location(openaq, loc_sensors, history): join one station's sensors</a></li>
+<li><a href="#8-3-station-pm25-openaq-sensors-history-pm-station-row-sensor-ids">8.3 _station_pm25(openaq, sensors, history) → (pm, station_row, sensor_ids)</a></li>
+<li><a href="#8-4-fetch-demo-false-history-true">8.4 fetch(demo=False, history=True)</a></li>
+<li><a href="#8-5-train-run-forecast-run-main">8.5 train(), run_forecast(), run(), main()</a></li>
+</ul>
+</li>
+<li><a href="#9-machine-learning-design-and-why-gradient-boosting">9. Machine-learning design, and why gradient boosting</a><ul>
+<li><a href="#9-1-framing-the-problem">9.1 Framing the problem</a></li>
+<li><a href="#9-2-why-gradient-boosted-decision-trees-gbdt">9.2 Why gradient-boosted decision trees (GBDT)?</a></li>
+<li><a href="#9-3-how-gradient-boosting-works-in-this-model">9.3 How gradient boosting works (in this model)</a></li>
+<li><a href="#9-4-hyperparameters-new-model-and-why">9.4 Hyperparameters (_new_model) and why</a></li>
+<li><a href="#9-5-target-transform-logarithm">9.5 Target transform: logarithm</a></li>
+<li><a href="#9-6-the-key-design-decision-predict-the-change-not-the-level">9.6 The key design decision: predict the change, not the level</a></li>
+<li><a href="#9-7-blending-with-persistence">9.7 Blending with persistence</a></li>
+<li><a href="#9-8-calibrated-uncertainty-split-conformal-scaling">9.8 Calibrated uncertainty: split-conformal scaling</a></li>
+<li><a href="#9-9-from-quantiles-to-a-probability-of-exceeding-a-threshold">9.9 From quantiles to a probability of exceeding a threshold</a></li>
+<li><a href="#9-10-honest-evaluation-no-leakage">9.10 Honest evaluation: no leakage</a></li>
+<li><a href="#9-11-explainability">9.11 Explainability</a></li>
+</ul>
+</li>
+<li><a href="#10-aq-features-py-feature-engineering">10. aq/features.py: feature engineering</a><ul>
+<li><a href="#10-1-series-features-df-dataframe">10.1 series_features(df) → DataFrame</a></li>
+<li><a href="#10-2-make-samples-sf-issue-pos-horizons-with-target-true-dataframe">10.2 make_samples(sf, issue_pos, horizons, with_target=True) → DataFrame</a></li>
+<li><a href="#10-3-feature-columns-x">10.3 feature_columns(X)</a></li>
+<li><a href="#10-4-design-x-r-base">10.4 design(X) → (R, base)</a></li>
+</ul>
+</li>
+<li><a href="#11-aq-model-py-training-calibration-evaluation-forecasting-explanation">11. aq/model.py: training, calibration, evaluation, forecasting, explanation</a><ul>
+<li><a href="#11-1-constants">11.1 Constants</a></li>
+<li><a href="#11-2-helper-functions">11.2 Helper functions</a></li>
+<li><a href="#11-3-build-training-set-df">11.3 build_training_set(df)</a></li>
+<li><a href="#11-4-train-and-backtest-df-fit-final-true">11.4 train_and_backtest(df, fit_final=True)</a></li>
+<li><a href="#11-5-interval-scale-cal-target-0-8">11.5 interval_scale(cal, target=0.8)</a></li>
+<li><a href="#11-6-evaluate-test-and-mae">11.6 evaluate(test) and _mae</a></li>
+<li><a href="#11-7-live-forecasting">11.7 Live forecasting</a></li>
+</ul>
+</li>
+<li><a href="#12-aq-insights-py-from-numbers-to-decisions">12. aq/insights.py: from numbers to decisions</a></li>
+<li><a href="#13-aq-ui-py-the-visual-layer">13. aq/ui.py: the visual layer</a></li>
+<li><a href="#14-app-py-the-streamlit-dashboard">14. app.py: the Streamlit dashboard</a><ul>
+<li><a href="#14-1-how-streamlit-runs-this-file">14.1 How Streamlit runs this file</a></li>
+<li><a href="#14-2-page-set-up-and-data-loading">14.2 Page set-up and data loading</a></li>
+<li><a href="#14-3-sidebar">14.3 Sidebar</a></li>
+<li><a href="#14-4-header">14.4 Header</a></li>
+<li><a href="#14-5-tabs">14.5 Tabs</a></li>
+</ul>
+</li>
+<li><a href="#15-aq-demo-py-synthetic-data-for-offline-demos">15. aq/demo.py: synthetic data for offline demos</a></li>
+<li><a href="#16-files-the-system-produces-data-contracts">16. Files the system produces (data contracts)</a></li>
+<li><a href="#17-evaluation-and-results">17. Evaluation and results</a><ul>
+<li><a href="#17-1-kolkata-padmapukur-howrah-station-forecasts-issued-april-september-2026">17.1 Kolkata (Padmapukur, Howrah station), forecasts issued April–September 2026</a></li>
+<li><a href="#17-2-how-to-read-these-results">17.2 How to read these results</a></li>
+</ul>
+</li>
+<li><a href="#18-design-decisions-and-the-bugs-that-shaped-them">18. Design decisions and the bugs that shaped them</a></li>
+<li><a href="#19-limitations-and-possible-extensions">19. Limitations and possible extensions</a></li>
+<li><a href="#20-glossary">20. Glossary</a></li>
+<li><a href="#21-likely-viva-questions-with-answers">21. Likely viva questions, with answers</a></li>
+</ul>
+</div>
+
+</nav>
+<main>
+<h1 id="kolkata-pm2-5-forecasting-early-warning-system-project-and-code-walkthrough-checkpoint-2">Kolkata PM2.5 Forecasting &amp; Early Warning System: Project and Code Walkthrough (Checkpoint 2)</h1>
+<p>This document explains the checkpoint-2 build of the project:</p>
+<ul>
+<li>what it does and why</li>
+<li>how the data flows</li>
+<li>every file and every function in the code</li>
+<li>the machine-learning design, including why gradient boosting was chosen</li>
+</ul>
+<p>It is written so that someone who has never seen the code can understand it, demonstrate it and defend it in a viva.</p>
+<p><strong>Scope of this build.</strong> It is a focused subset of the full system:</p>
+<table>
+<thead>
+<tr>
+<th>Included</th>
+<th>Not included in this build</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kolkata, with the monitoring station chosen automatically</td>
+<td>Other cities, place search, the city comparison view</td>
+</tr>
+<tr>
+<td>Data collection, cleaning and merging (OpenAQ + Open-Meteo + CAMS)</td>
+<td>Choosing the station by hand</td>
+</tr>
+<tr>
+<td>The 60-hour ML forecast with uncertainty and probabilities</td>
+<td>Telegram / e-mail alert notifications</td>
+</tr>
+<tr>
+<td>The early-warning dashboard: warning levels, 48-hour strip, daily outlook, best outdoor time, explanations, track record, patterns</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>The code has 12 Python files and about 1,900 lines.</p>
+<hr />
+<h2 id="1-the-problem">1. The problem</h2>
+<h3 id="1-1-what-pm2-5-is-and-why-it-matters">1.1 What PM2.5 is and why it matters</h3>
+<p>PM2.5 is the mass concentration of airborne particles smaller than 2.5 micrometres, measured in µg/m³ (micrograms per cubic metre).</p>
+<ul>
+<li>The particles are small enough to reach deep into the lungs and the bloodstream.</li>
+<li>Long-term exposure is linked to heart disease, stroke, lung cancer and respiratory illness.</li>
+<li>In Kolkata, as in most Indian cities, PM2.5 is usually the pollutant that drives the Air Quality Index (AQI). This is especially true in winter, when cold, still air traps emissions near the ground.</li>
+</ul>
+<p><strong>Standards used in this project:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Reference</th>
+<th>24-hour PM2.5 limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>India NAAQS (National Ambient Air Quality Standard)</td>
+<td>60 µg/m³</td>
+</tr>
+<tr>
+<td>WHO 2021 guideline</td>
+<td>15 µg/m³</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-2-why-forecast-it">1.2 Why forecast it?</h3>
+<p>Pollution episodes are largely driven by weather:</p>
+<ul>
+<li>low wind speed</li>
+<li>a shallow mixing layer (the "lid" of the atmosphere)</li>
+<li>no rain</li>
+<li>winds that bring smoke from the Indo-Gangetic plain</li>
+</ul>
+<p>Weather can be forecast a few days ahead, and the station's recent readings show where pollution stands now. Together they make PM2.5 predictable 1–2 days in advance. That gives people time to act:</p>
+<ul>
+<li>reschedule a run</li>
+<li>keep a child with asthma indoors</li>
+<li>close windows and switch on a purifier</li>
+</ul>
+<h3 id="1-3-the-project-s-three-objectives">1.3 The project's three objectives</h3>
+<ol>
+<li><strong>Collect and combine data</strong>: historical PM2.5 from OpenAQ, plus weather (temperature, wind, humidity and more) from Open-Meteo.</li>
+<li><strong>Predict future air quality</strong>: a machine-learning model that learns how weather and past pollution interact, and forecasts PM2.5 24–48 hours ahead.</li>
+<li><strong>Early warning</strong>: a visual dashboard that highlights when pollution will cross safe thresholds and issues warnings in advance.</li>
+</ol>
+<h3 id="1-4-what-google-weather-doesn-t-provide">1.4 What "Google Weather doesn't provide"</h3>
+<p>Google Weather and most weather apps show an AQI that comes from a <strong>global chemistry model</strong>, typically CAMS (Copernicus Atmosphere Monitoring Service), on a grid of roughly 10–45 km. They give:</p>
+<ul>
+<li>no uncertainty</li>
+<li>no probability</li>
+<li>no early warning</li>
+<li>no explanation</li>
+<li>no personal thresholds</li>
+<li>no accuracy record</li>
+</ul>
+<p>This project adds all of these. Section 2.4 lists each gap and the code that fills it.</p>
+<hr />
+<h2 id="2-the-system-at-a-glance">2. The system at a glance</h2>
+<h3 id="2-1-architecture">2.1 Architecture</h3>
+<div class="hl"><pre><span></span><code>                 ┌──────────────────────── DATA SOURCES ────────────────────────┐
+                 │ OpenAQ v3 API          Open-Meteo APIs                       │
+                 │  • station list         • historical-forecast (weather)       │
+                 │  • hourly PM2.5         • forecast (weather, next 4 days)     │
+                 │                         • air-quality (CAMS PM2.5)            │
+                 └───────────┬───────────────────────┬──────────────────────────┘
+                             │ aq/openaq.py          │ aq/openmeteo.py
+                             ▼                       ▼
+   pipeline.py fetch ─► automatic station choice + sensor stitching ─► data/kolkata/raw/
+                             │
+                             ▼  aq/dataset.py
+                  quality control ─► hourly merge (one UTC grid) ─► outage bridging
+                             │                          data/kolkata/processed/hourly.csv
+                             ▼  aq/features.py
+                  (issue time T, lead time h) samples ─► scale-free design matrix
+                             │
+                             ▼  aq/model.py
+   pipeline.py train ─► 3 quantile gradient-boosting models (q10, q50, q90)
+                        ─► backtest ─► blending weights ─► conformal band scaling
+                        ─► models/kolkata/pm25_quantile_gbm.joblib, reports/kolkata/backtest.json
+                             │
+   pipeline.py forecast ─► 60-hour forecast + driver attribution
+                        ─► reports/kolkata/forecast.csv, drivers.csv
+                             │
+                             ▼
+             app.py (Streamlit dashboard), using aq/insights.py and aq/ui.py
+</code></pre></div>
+
+<h3 id="2-2-folder-layout">2.2 Folder layout</h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>What it holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config.py</code></td>
+<td>Settings: Kolkata's coordinates, folders, thresholds, model settings</td>
+</tr>
+<tr>
+<td><code>pipeline.py</code></td>
+<td>Command-line entry point: fetch, train, forecast, update, all</td>
+</tr>
+<tr>
+<td><code>app.py</code></td>
+<td>Streamlit dashboard</td>
+</tr>
+<tr>
+<td><code>aq/openaq.py</code></td>
+<td>OpenAQ API client</td>
+</tr>
+<tr>
+<td><code>aq/openmeteo.py</code></td>
+<td>Open-Meteo weather and CAMS client</td>
+</tr>
+<tr>
+<td><code>aq/dataset.py</code></td>
+<td>Quality control, merging, outage bridging</td>
+</tr>
+<tr>
+<td><code>aq/features.py</code></td>
+<td>Feature engineering and the model's design matrix</td>
+</tr>
+<tr>
+<td><code>aq/model.py</code></td>
+<td>Training, calibration, evaluation, forecasting, explanations</td>
+</tr>
+<tr>
+<td><code>aq/insights.py</code></td>
+<td>AQI, warning levels, daily outlook, best windows, advice</td>
+</tr>
+<tr>
+<td><code>aq/ui.py</code></td>
+<td>Dashboard look: CSS, Plotly template, header strip, tiles</td>
+</tr>
+<tr>
+<td><code>aq/demo.py</code></td>
+<td>Synthetic offline data</td>
+</tr>
+<tr>
+<td><code>data/kolkata/raw/</code></td>
+<td><code>sensors.csv</code>, <code>pm25_location_&lt;id&gt;.csv</code>, <code>weather_history.csv</code>, <code>cams_history.csv</code></td>
+</tr>
+<tr>
+<td><code>data/kolkata/processed/</code></td>
+<td><code>hourly.csv</code>, <code>meta.json</code></td>
+</tr>
+<tr>
+<td><code>models/kolkata/</code></td>
+<td><code>pm25_quantile_gbm.joblib</code></td>
+</tr>
+<tr>
+<td><code>reports/kolkata/</code></td>
+<td><code>forecast.csv</code>, <code>drivers.csv</code>, <code>backtest.json</code>, <code>backtest_predictions.csv</code></td>
+</tr>
+<tr>
+<td><code>.streamlit/config.toml</code></td>
+<td>Dashboard theme</td>
+</tr>
+<tr>
+<td><code>.env</code></td>
+<td>OpenAQ API key (never committed)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-3-technology-choices">2.3 Technology choices</h3>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Choice</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td>Python 3.10+</td>
+<td>The standard for data science; every library needed exists</td>
+</tr>
+<tr>
+<td>Tables and time series</td>
+<td>pandas, numpy</td>
+<td>Time-indexed resampling, rolling windows, joins and time-zone handling are first-class</td>
+</tr>
+<tr>
+<td>Machine learning</td>
+<td>scikit-learn <code>HistGradientBoostingRegressor</code></td>
+<td>Gradient-boosted trees with native quantile loss and native missing-value support; no extra dependency (see section 9)</td>
+</tr>
+<tr>
+<td>Model storage</td>
+<td>joblib</td>
+<td>Fast, standard way to save scikit-learn objects</td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td>requests</td>
+<td>Simple, reliable API calls</td>
+</tr>
+<tr>
+<td>Dashboard</td>
+<td>Streamlit</td>
+<td>A full interactive web app in pure Python; re-runs the script on every interaction</td>
+</tr>
+<tr>
+<td>Charts</td>
+<td>Plotly</td>
+<td>Interactive (hover, zoom), works natively in Streamlit, has a polar chart type for the pollution rose</td>
+</tr>
+<tr>
+<td>Station data</td>
+<td>OpenAQ v3</td>
+<td>The largest open archive of government monitor data (including CPCB) with one API</td>
+</tr>
+<tr>
+<td>Weather</td>
+<td>Open-Meteo</td>
+<td>Free, no key, hourly, has <em>archived forecasts</em> and mixing height</td>
+</tr>
+<tr>
+<td>Regional model</td>
+<td>CAMS via Open-Meteo</td>
+<td>Gives the large-scale pollution signal and is the baseline to beat</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-4-gaps-in-weather-apps-and-where-the-code-fills-them">2.4 Gaps in weather apps and where the code fills them</h3>
+<table>
+<thead>
+<tr>
+<th>Gap</th>
+<th>Where it's solved</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Not your station</td>
+<td><code>pipeline._station_pm25</code>, <code>_fetch_location</code> (station choice); <code>features.design</code> (anchored to the station's current level)</td>
+</tr>
+<tr>
+<td>No uncertainty</td>
+<td>Quantile models in <code>model.py</code> (q10/q50/q90) plus <code>interval_scale</code> (calibration)</td>
+</tr>
+<tr>
+<td>No probability</td>
+<td><code>model.exceed_prob</code> (split-normal in log space)</td>
+</tr>
+<tr>
+<td>No early warning</td>
+<td><code>insights.alert_summary</code> (Watch/Warning/Emergency, start time, lead time, duration, peak)</td>
+</tr>
+<tr>
+<td>One scale for everyone</td>
+<td><code>config.PROFILES</code> and the sidebar threshold slider</td>
+</tr>
+<tr>
+<td>US AQI</td>
+<td><code>insights.sub_index</code>, <code>aqi</code>, <code>aqi_category</code> (CPCB), <code>config.NAAQS_24H</code>, <code>WHO_24H</code></td>
+</tr>
+<tr>
+<td>No explanation</td>
+<td><code>model.driver_attribution</code> (counterfactual), <code>permutation_importance</code>, <code>insights.driver_sentences</code></td>
+</tr>
+<tr>
+<td>No planning help</td>
+<td><code>insights.best_windows</code>, <code>daily_outlook</code> (× WHO, cigarettes)</td>
+</tr>
+<tr>
+<td>No accuracy record</td>
+<td><code>model.evaluate</code> (MAE by lead time, POD/FAR/CSI, Brier, reliability), Track record tab</td>
+</tr>
+<tr>
+<td>No local analysis</td>
+<td>Patterns tab (heatmap, pollution rose, weekday effect, days above the limit)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-what-happens-when-you-run-it-end-to-end-flows">3. What happens when you run it (end-to-end flows)</h2>
+<h3 id="3-1-python-pipeline-py-all">3.1 <code>python pipeline.py all</code></h3>
+<ol>
+<li><strong>Configuration loads</strong> (<code>import config</code>): it reads <code>.env</code> into environment variables, fixes Kolkata's coordinates and time zone, and creates the four folders <code>data/kolkata/raw</code>, <code>data/kolkata/processed</code>, <code>models/kolkata</code> and <code>reports/kolkata</code>.</li>
+<li><code>main()</code> parses the command (and <code>--demo</code> if given).</li>
+<li><code>run("all")</code> prints a header and calls <code>fetch(history=True)</code>, <code>train()</code> and <code>run_forecast()</code> in that order.</li>
+<li><strong><code>fetch</code></strong>:<ol>
+<li><code>openaq.find_pm25_sensors</code> lists every PM2.5 sensor within 25 km and saves <code>sensors.csv</code>.</li>
+<li><code>_station_pm25</code> chooses a station. It tries stations in ranked order and downloads all sensors of each station with <code>_fetch_location</code>, until one has at least 30 days of data and a reading in the last 14 days.</li>
+<li>Weather and CAMS history (2023 to two days ago) are downloaded year by year, then joined with the 5-days-past / 4-days-ahead forecast data (<code>_combine</code>).</li>
+<li><code>dataset.clean_pm25</code> runs quality control. <code>dataset.merge_sources</code> puts everything on one hourly grid. <code>dataset.bridge_gap</code> fills a recent station outage with an estimate.</li>
+<li><code>hourly.csv</code> and <code>meta.json</code> are written.</li>
+</ol>
+</li>
+<li><strong><code>train</code></strong> → <code>model.train_and_backtest</code>:<ol>
+<li>Builds about 300,000–1,000,000 (issue time, lead time) samples.</li>
+<li>Holds out the last 25 % of the timeline and trains three quantile models on the rest.</li>
+<li>Tunes the blending weights and the band calibration on alternate weeks of the held-out period, and scores on the remaining weeks.</li>
+<li>Computes permutation importance.</li>
+<li>Refits on all the data and saves the model bundle and <code>backtest.json</code>.</li>
+</ol>
+</li>
+<li><strong><code>run_forecast</code></strong>:<ol>
+<li>Loads <code>hourly.csv</code> and fills any outage with the bridge estimate.</li>
+<li>Builds the 60 samples for "now" and predicts q10/q50/q90.</li>
+<li>Computes the driver attribution.</li>
+<li>Writes <code>forecast.csv</code> and <code>drivers.csv</code>.</li>
+</ol>
+</li>
+</ol>
+<h3 id="3-2-python-pipeline-py-update">3.2 <code>python pipeline.py update</code></h3>
+<p><code>update</code> does the same as <code>all</code> <strong>without</strong> retraining and without re-downloading the weather history:</p>
+<ul>
+<li><code>fetch(history=False)</code> reuses the saved weather and CAMS history files.</li>
+<li>OpenAQ is asked only for the last few days per sensor (incremental download).</li>
+<li>Then <code>run_forecast()</code> runs.</li>
+</ul>
+<p>It takes about a minute. This is what the dashboard's <strong>Refresh</strong> button runs.</p>
+<h3 id="3-3-opening-the-dashboard-streamlit-run-app-py">3.3 Opening the dashboard (<code>streamlit run app.py</code>)</h3>
+<p>Streamlit runs <code>app.py</code> from top to bottom <strong>on every interaction</strong>. Each run:</p>
+<ol>
+<li><strong>Checks that a forecast exists.</strong> If <code>pipeline.py all</code> hasn't been run yet, the page says so and stops.</li>
+<li><strong><code>load_all</code></strong> reads the CSV/JSON files. It is cached and only reloads when the files' modification time changes.</li>
+<li><strong>Sidebar:</strong> the user's profile, warning threshold and outdoor-window length, plus the <strong>Refresh</strong> button.</li>
+<li><strong><code>insights.alert_summary</code>, <code>upcoming</code> and <code>daily_outlook</code></strong> turn the forecast into decisions.</li>
+<li><strong><code>ui.hero</code></strong> draws the header with the 48-hour strip, and <strong><code>ui.tiles</code></strong> draws the four figures.</li>
+<li><strong>Six tabs</strong> show charts and tables.</li>
+</ol>
+<h3 id="3-4-when-the-station-goes-silent">3.4 When the station goes silent</h3>
+<p>CPCB feeds on OpenAQ sometimes stop for hours or days.</p>
+<ol>
+<li><code>bridge_gap</code> detects the gap (more than 6 hours).</li>
+<li>If the gap is under 14 days, it estimates the missing hours as <strong>CAMS × (the station/CAMS ratio over the last 7 days)</strong>.</li>
+<li>The estimates go into a separate column <code>pm25_bridge</code>:<ul>
+<li><code>run_forecast</code> merges it into <code>pm25</code> so the forecast starts from <em>now</em>.</li>
+<li>Training never sees it.</li>
+</ul>
+</li>
+<li>The dashboard shows a warning and plots the estimate as a dotted line.</li>
+</ol>
+<hr />
+<h2 id="4-data-sources-in-detail">4. Data sources in detail</h2>
+<h3 id="4-1-openaq-v3-station-measurements">4.1 OpenAQ v3 (station measurements)</h3>
+<ul>
+<li><strong>Base URL</strong> <code>https://api.openaq.org/v3</code>. Every request needs the header <code>X-API-Key</code>.</li>
+<li><strong>Concepts:</strong><ul>
+<li>A <strong>location</strong> is a monitoring site, for example "Victoria, Kolkata - WBPCB".</li>
+<li>A <strong>sensor</strong> is one parameter measured at that location. PM2.5 is <strong>parameter id 2</strong>.</li>
+<li>Many Indian locations have <strong>two PM2.5 sensor IDs</strong>: an old one (history up to about 2024) and a new one (current data). The code joins them (section 8.2).</li>
+</ul>
+</li>
+<li><strong>Endpoints used:</strong><ul>
+<li><code>GET /locations?coordinates=lat,lon&amp;radius=25000&amp;parameters_id=2&amp;limit=100</code> returns locations near a point, each with its sensors, provider, <code>isMonitor</code>, <code>datetimeFirst</code>, <code>datetimeLast</code> and distance.</li>
+<li><code>GET /sensors/{id}/hours?datetime_from&amp;datetime_to&amp;limit&amp;page</code> returns <strong>hourly averages</strong> (<code>value</code>, <code>period.datetimeFrom.utc</code>, <code>coverage.percentComplete</code>).</li>
+</ul>
+</li>
+<li><strong>Limits:</strong> about 60 requests per minute. The client sleeps 1.1 s after each call, and on HTTP 429 or 5xx it waits and retries.</li>
+<li><strong>Time:</strong> all times are taken in <strong>UTC</strong>. Indian stations report on the half hour in UTC (for example 13:30 UTC = 19:00 IST), and the code floors them to the hour.</li>
+</ul>
+<h3 id="4-2-open-meteo-weather-and-cams-free-no-key">4.2 Open-Meteo (weather and CAMS): free, no key</h3>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>URL</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Historical <strong>forecast</strong></td>
+<td><code>historical-forecast-api.open-meteo.com/v1/forecast</code></td>
+<td>Training weather: archived short-range forecasts, about 2022 onward</td>
+</tr>
+<tr>
+<td>ERA5 archive</td>
+<td><code>archive-api.open-meteo.com/v1/archive</code></td>
+<td>Fallback if the above fails</td>
+</tr>
+<tr>
+<td>Forecast</td>
+<td><code>api.open-meteo.com/v1/forecast</code></td>
+<td>The last 5 days plus the next 4 days</td>
+</tr>
+<tr>
+<td>Air quality (CAMS)</td>
+<td><code>air-quality-api.open-meteo.com/v1/air-quality</code></td>
+<td>CAMS PM2.5: history from Aug 2022 plus a 4-day forecast</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why archived forecasts rather than reanalysis for training?</strong> At prediction time the model only has <em>forecast</em> weather, which contains forecast errors. ERA5 reanalysis is "perfect hindsight" weather. A model trained on it learns relationships that are too clean, and then performs worse live. Training on archived forecasts makes the inputs statistically like the live inputs. This is the principle known as <em>train–serve consistency</em>.</p>
+<p><strong>Weather variables requested:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Column</th>
+<th>Why it matters for PM2.5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>temperature_2m</code></td>
+<td><code>temp</code></td>
+<td>Cold nights mean inversions and more heating and burning emissions</td>
+</tr>
+<tr>
+<td><code>relative_humidity_2m</code></td>
+<td><code>rh</code></td>
+<td>Humid air makes particles absorb water and grow, and helps secondary aerosol form</td>
+</tr>
+<tr>
+<td><code>dew_point_2m</code></td>
+<td><code>dewpoint</code></td>
+<td>Moisture content; fog episodes</td>
+</tr>
+<tr>
+<td><code>wind_speed_10m</code></td>
+<td><code>wind_speed</code></td>
+<td>Dilution and dispersion</td>
+</tr>
+<tr>
+<td><code>wind_direction_10m</code></td>
+<td><code>wind_dir</code></td>
+<td>Where air comes from (for example the polluted Indo-Gangetic plain)</td>
+</tr>
+<tr>
+<td><code>wind_gusts_10m</code></td>
+<td><code>wind_gust</code></td>
+<td>Turbulence</td>
+</tr>
+<tr>
+<td><code>surface_pressure</code></td>
+<td><code>pressure</code></td>
+<td>High pressure means stagnant, sinking air</td>
+</tr>
+<tr>
+<td><code>precipitation</code></td>
+<td><code>precip</code></td>
+<td>Rain washes particles out ("wet deposition")</td>
+</tr>
+<tr>
+<td><code>cloud_cover</code></td>
+<td><code>cloud</code></td>
+<td>Affects heating of the ground and therefore mixing</td>
+</tr>
+<tr>
+<td><code>shortwave_radiation</code></td>
+<td><code>radiation</code></td>
+<td>Daytime heating deepens the mixing layer</td>
+</tr>
+<tr>
+<td><code>boundary_layer_height</code></td>
+<td><code>blh</code></td>
+<td><strong>The single most important meteorological factor</strong>: the depth of air that pollution mixes into</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-3-cams">4.3 CAMS</h3>
+<p>CAMS is a physics-based global chemistry model run by ECMWF for the EU Copernicus programme. It simulates emissions, transport and chemistry.</p>
+<p><strong>Strengths:</strong></p>
+<ul>
+<li>It knows about regional events, such as smoke being carried in from Punjab.</li>
+<li>It forecasts several days ahead.</li>
+</ul>
+<p><strong>Weaknesses:</strong></p>
+<ul>
+<li>It is coarse (about 45 km over India).</li>
+<li>Its emission inventories are imperfect.</li>
+<li>It is often biased: the Kolkata error is about 12–14 µg/m³, against about 4 for our model.</li>
+</ul>
+<p>In this project CAMS plays two roles:</p>
+<ol>
+<li><strong>An input</strong>: the model uses how much CAMS expects PM2.5 to <em>change</em>, which captures incoming regional pollution.</li>
+<li><strong>A benchmark</strong>: it is what weather apps show, so beating it is the point of the project.</li>
+</ol>
+<hr />
+<h2 id="5-config-py-settings">5. <code>config.py</code>: settings</h2>
+<p><code>config.py</code> is imported by every other module and holds all constants in one place.</p>
+<h3 id="5-1-load-dotenv">5.1 <code>_load_dotenv()</code></h3>
+<p>This is a tiny <code>.env</code> reader that avoids a dependency on <code>python-dotenv</code>.</p>
+<ul>
+<li>It reads <code>KEY=value</code> lines, skipping blank lines and <code>#</code> comments, and strips quotes.</li>
+<li>It uses <code>os.environ.setdefault</code>, so a real environment variable always wins over the file.</li>
+</ul>
+<p>It runs at import, and then <code>OPENAQ_API_KEY</code> is read.</p>
+<h3 id="5-2-constants">5.2 Constants</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ROOT</code></td>
+<td>folder of <code>config.py</code></td>
+<td>Project root; all paths are built from it</td>
+</tr>
+<tr>
+<td><code>OPENAQ_API_KEY</code></td>
+<td>from <code>.env</code></td>
+<td>Needed for station data</td>
+</tr>
+<tr>
+<td><code>CITY</code>, <code>LAT</code>, <code>LON</code></td>
+<td>Kolkata, 22.5726, 88.3639</td>
+<td>The city centre used to search for monitors and fetch weather</td>
+</tr>
+<tr>
+<td><code>LOCAL_TZ</code></td>
+<td>Asia/Kolkata</td>
+<td>Used for hour-of-day features and every time shown to users</td>
+</tr>
+<tr>
+<td><code>SEARCH_RADIUS_M</code></td>
+<td>25 000</td>
+<td>OpenAQ's maximum search radius</td>
+</tr>
+<tr>
+<td><code>RAW_DIR</code>, <code>PROC_DIR</code>, <code>MODEL_DIR</code>, <code>REPORT_DIR</code></td>
+<td><code>data/kolkata/raw</code>, <code>data/kolkata/processed</code>, <code>models/kolkata</code>, <code>reports/kolkata</code></td>
+<td>Created at import if missing</td>
+</tr>
+<tr>
+<td><code>TRAIN_START</code></td>
+<td><code>2023-01-01</code> (or <code>AQ_TRAIN_START</code>)</td>
+<td>First day of history downloaded. Open-Meteo's archived forecasts and CAMS history start in 2022, so 2023 is safe</td>
+</tr>
+<tr>
+<td><code>MAX_HORIZON</code></td>
+<td>60</td>
+<td>Forecast length in hours: 48 h of useful forecast plus 12 h of slack, because Indian stations often report hours late. If the last reading is 10 h old, a 60-h forecast still covers the next 48 h from <em>now</em></td>
+</tr>
+<tr>
+<td><code>QUANTILES</code></td>
+<td>(0.1, 0.5, 0.9)</td>
+<td>The 10th, 50th (median) and 90th percentiles forecast</td>
+</tr>
+<tr>
+<td><code>ISSUE_STRIDE</code></td>
+<td>3</td>
+<td>Only every 3rd hour is used as a training "issue time". Neighbouring hours are nearly identical, so this cuts the data and training time by 3× with almost no loss of information</td>
+</tr>
+<tr>
+<td><code>TEST_FRACTION</code></td>
+<td>0.25</td>
+<td>The last 25 % of time is held out for the backtest</td>
+</tr>
+<tr>
+<td><code>CATEGORIES</code></td>
+<td>CPCB PM2.5 bands with colours</td>
+<td>Good ≤30, Satisfactory ≤60, Moderate ≤90, Poor ≤120, Very Poor ≤250, Severe above that</td>
+</tr>
+<tr>
+<td><code>NAAQS_24H</code>, <code>WHO_24H</code></td>
+<td>60, 15</td>
+<td>24-h standards</td>
+</tr>
+<tr>
+<td><code>PROFILES</code></td>
+<td>5 profiles → threshold</td>
+<td>General 90; Sensitive, Children &amp; elderly, Outdoor workers 60; Strict (WHO-based) 35</td>
+</tr>
+</tbody>
+</table>
+<p>The folder layout (<code>data/kolkata/…</code>, <code>models/kolkata/…</code>, <code>reports/kolkata/…</code>) is the same as the full multi-city version. Data and models built by either version can therefore be copied between them.</p>
+<hr />
+<h2 id="6-data-clients">6. Data clients</h2>
+<h3 id="6-1-aq-openaq-py-openaq-v3-client">6.1 <code>aq/openaq.py</code>: OpenAQ v3 client</h3>
+<p>Constants: <code>BASE = "https://api.openaq.org/v3"</code>, <code>PM25_PARAMETER_ID = 2</code>.</p>
+<p><strong><code>_get(path, params, retries=6)</code></strong> handles every call to OpenAQ.</p>
+<ol>
+<li>Refuses to run without an API key, with a helpful message that says where to get one.</li>
+<li>Sends the request with header <code>X-API-Key</code> and a 60 s timeout.</li>
+<li>On <strong>429 (rate-limited) or 5xx</strong>, waits and retries, up to 6 attempts:<ul>
+<li>the wait is the <code>x-ratelimit-reset</code> header if present, otherwise exponential back-off (5 s, 10 s, 20 s…)</li>
+<li>the wait is capped at 60 s</li>
+</ul>
+</li>
+<li>On other errors, raises (<code>raise_for_status</code>).</li>
+<li>After every success it sleeps <strong>1.1 s</strong>, which keeps the client under about 55 requests per minute.</li>
+</ol>
+<p><strong><code>find_pm25_sensors(lat, lon, radius_m)</code></strong> builds the list of candidate sensors.</p>
+<ul>
+<li>Calls <code>/locations</code> with <code>coordinates</code>, <code>radius</code>, <code>parameters_id=2</code> and <code>limit=100</code>.</li>
+<li>Makes one row per PM2.5 sensor with these fields:<ul>
+<li><code>sensor_id</code>, <code>location_id</code>, <code>location</code> (name), <code>provider</code> (for example CPCB, AirNow)</li>
+<li><code>is_monitor</code> (reference-grade vs low-cost), <code>lat</code>/<code>lon</code>, <code>distance_m</code></li>
+<li><code>first</code> / <code>last</code> (the location's first and last data times)</li>
+</ul>
+</li>
+<li>Adds two derived columns:<ul>
+<li><code>active</code>: last data less than 3 days ago</li>
+<li><code>years</code>: <code>(last - first)</code> in years</li>
+</ul>
+</li>
+<li><strong>Ranking:</strong> active first, then reference monitors, then the longest history, then the closest.</li>
+<li><em>Nitty-gritty:</em> <code>first</code> and <code>last</code> are <strong>location-level</strong> dates. That is why two sensors of the same station get the same rank, and why the pipeline joins all sensors of a station instead of trusting one sensor ID (see section 8.2).</li>
+</ul>
+<p><strong><code>fetch_sensor_hours(sensor_id, start, end=None, chunk_days=120)</code></strong> downloads a long history safely.</p>
+<ul>
+<li>Normalises <code>start</code> and <code>end</code> to UTC. <code>end</code> defaults to now.</li>
+<li>Splits the period into <strong>120-day chunks</strong>, because asking for years at once can hit the API's timeout (HTTP 408).</li>
+<li>Concatenates the chunks, drops duplicate timestamps and sorts.</li>
+<li>Returns an empty frame with the right columns if there is no data.</li>
+</ul>
+<p><strong><code>_fetch_hours_range(sensor_id, start, end)</code></strong> handles one chunk, with pagination.</p>
+<ul>
+<li>Requests <code>limit=1000</code> per page and keeps paging until a page returns fewer rows than the limit.</li>
+<li>If the server rejects <code>limit=1000</code> with <strong>422</strong>, it restarts the chunk with <code>limit=100</code>. Some API deployments cap the page size.</li>
+<li>For each item it keeps <code>time = period.datetimeFrom.utc</code>, <code>pm25 = value</code> and <code>coverage = coverage.percentComplete</code>. Coverage is the share of sub-hourly readings present in that hour, and quality control uses it.</li>
+<li>Prints progress on one line (<code>end="\r"</code>).</li>
+</ul>
+<h3 id="6-2-aq-openmeteo-py-weather-and-cams-client">6.2 <code>aq/openmeteo.py</code>: weather and CAMS client</h3>
+<p>Constants: four endpoint URLs, <code>WEATHER_VARS</code> (the 11 hourly variables in section 4.2), and <code>RENAME</code>, which maps API names to short column names.</p>
+<p><strong><code>_request(url, params, variables)</code></strong> is the self-healing core of this module.</p>
+<ul>
+<li>Always asks for <code>timezone=GMT</code> (UTC timestamps) and <code>wind_speed_unit=ms</code> (metres per second).</li>
+<li><strong>Unsupported-variable recovery:</strong> if the API answers 400 and its <code>reason</code> mentions one of the requested variables, that variable is removed and the request retried. The historical endpoints don't all offer <code>boundary_layer_height</code> for every period, and this keeps the pipeline running instead of crashing.</li>
+<li>On 429 it waits 30 s, 60 s, and so on.</li>
+<li>Converts the JSON <code>hourly</code> block to a DataFrame and localises the times to UTC.</li>
+<li><strong>Forces every value column to numeric</strong> (<code>pd.to_numeric(errors="coerce")</code>). JSON <code>null</code>s for a missing variable otherwise produce <em>object</em> columns, which crashed <code>interpolate</code> in an early version.</li>
+<li>Renames the columns with <code>RENAME</code>.</li>
+</ul>
+<p><strong><code>_yearly_chunks(start, end)</code></strong> is a generator of (start, end) date strings, one calendar year at a time. Long requests are slower and more fragile.</p>
+<p><strong><code>fetch_weather_history(lat, lon, start, end)</code></strong> fetches yearly chunks from the <strong>historical-forecast</strong> API. If a chunk fails, that chunk is fetched from the <strong>ERA5 archive</strong> instead.</p>
+<p><strong><code>fetch_weather_forecast(lat, lon, past_days=5, days=4)</code></strong> fetches recent and future weather. The 5 past days cover the archive lag (it ends 2 days ago) plus some overlap.</p>
+<p><strong><code>fetch_cams_history(lat, lon, start, end)</code></strong> fetches CAMS PM2.5 history.</p>
+<ul>
+<li>The start is clipped to <code>2022-08-01</code>, where CAMS history begins.</li>
+<li>A failed year is skipped with a message rather than stopping the run.</li>
+<li>Returns an empty frame with the right columns if nothing came back.</li>
+</ul>
+<p><strong><code>fetch_cams_forecast(...)</code></strong> fetches recent and future CAMS PM2.5.</p>
+<hr />
+<h2 id="7-aq-dataset-py-quality-control-merging-outage-bridging">7. <code>aq/dataset.py</code>: quality control, merging, outage bridging</h2>
+<p>Raw station data is messy. This module turns it into one clean, gap-aware hourly table.</p>
+<h3 id="7-1-clean-pm25-pm-min-coverage-50-series-report">7.1 <code>clean_pm25(pm, min_coverage=50) → (series, report)</code></h3>
+<p>Steps, in order:</p>
+<ol>
+<li><strong>Floor timestamps to the hour and average duplicates.</strong> Readings stamped <code>13:30</code> and <code>13:00</code> both become <code>13:00</code> and are averaged.</li>
+<li>
+<p><strong>Flag bad readings.</strong> Four rules mark readings as missing; nothing is deleted outright.</p>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Condition</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Out of range</td>
+<td><code>pm25 ≤ 0</code> or <code>&gt; 1000</code></td>
+<td>Physically impossible or a sensor fault</td>
+</tr>
+<tr>
+<td>Low coverage</td>
+<td><code>coverage &lt; 50 %</code></td>
+<td>The "hourly average" came from too few sub-hourly readings</td>
+</tr>
+<tr>
+<td>Stuck sensor</td>
+<td>the same value for <strong>≥ 6 consecutive hours</strong></td>
+<td>A frozen logger repeats its last value. Real PM2.5 almost never stays exactly constant that long</td>
+</tr>
+<tr>
+<td>Isolated spike</td>
+<td><code>&gt; 4 ×</code> the centred 25-hour rolling median <strong>and</strong> <code>&gt; 250</code></td>
+<td>One-off glitches. Both conditions are required, so genuine high episodes, which rise gradually, survive</td>
+</tr>
+</tbody>
+</table>
+<p><em>How the stuck-sensor rule works:</em> <code>run_id = (s.diff() != 0).cumsum()</code> gives every run of equal consecutive values the same id. <code>groupby(run_id).transform("size")</code> then gives each reading the length of its run.</p>
+</li>
+<li>
+<p><strong>Stop if nothing is left.</strong> If every reading is now missing, the function stops with a clear message.</p>
+</li>
+<li><strong>Reindex to a complete hourly grid</strong>, from the first to the last reading.</li>
+<li><strong>Interpolate only short gaps</strong> (<code>limit=3</code>, <code>limit_area="inside"</code>). A missing hour or two is filled with a straight line; longer gaps stay empty. Inventing hours of pollution would teach the model fake dynamics, and gradient boosting handles missing values natively anyway.</li>
+<li><strong>Return the report</strong> used by the dashboard's data-quality panel:<ul>
+<li><code>raw_hours</code></li>
+<li>counts for each rule</li>
+<li><code>grid_hours</code>, <code>gaps_filled</code>, <code>still_missing</code>, <code>completeness_pct</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="7-2-merge-sources-pm-weather-cams-dataframe">7.2 <code>merge_sources(pm, weather, cams) → DataFrame</code></h3>
+<ul>
+<li>Converts all inputs to UTC-indexed, de-duplicated, sorted, numeric frames. The <code>apply(pd.to_numeric)</code> step guards against object columns, and weather columns that are entirely empty are dropped.</li>
+<li>Builds a single hourly grid from the <strong>first PM2.5 reading</strong> to the <strong>later of</strong> the last PM2.5 reading and the last weather hour. The grid therefore extends about 4 days into the future, where <code>pm25</code> is NaN but weather and CAMS forecasts exist. That future part is what the forecast uses.</li>
+<li>Left-joins weather and CAMS onto the grid.</li>
+<li>Interpolates weather gaps of up to 6 hours in both directions (weather is smooth), and CAMS gaps of up to 6 hours inside the series only.</li>
+</ul>
+<h3 id="7-3-bridge-gap-df-now-min-gap-h-6-max-gap-days-14-df-info">7.3 <code>bridge_gap(df, now, min_gap_h=6, max_gap_days=14) → (df, info)</code></h3>
+<p>This handles the real-world problem of a station going offline.</p>
+<ul>
+<li>It always adds a <code>pm25_bridge</code> column, set to NaN by default.</li>
+<li><code>gap_hours</code> is the time from the last real reading to now.</li>
+<li><strong>The gap is not bridged when:</strong><ul>
+<li>the gap is under 6 h (normal reporting delay)</li>
+<li>there is no CAMS data</li>
+<li>the gap is over 14 days; <code>info["note"]</code> records that the station has been offline too long, because CAMS alone is too uncertain that long</li>
+<li>there are fewer than 24 overlapping hours in the last week</li>
+</ul>
+</li>
+<li><strong>Otherwise:</strong><ol>
+<li>Compute the station/CAMS ratio over the last 7 days in <strong>log space</strong>: <code>ratio = exp(median(log1p(pm) − log1p(cams)))</code>. The median makes it robust to outliers, and log space makes it a multiplicative correction.</li>
+<li>Fill <code>pm25_bridge</code> for the gap hours with <code>cams × ratio</code> (computed in log1p space, clipped at 0).</li>
+</ol>
+</li>
+<li><code>info</code> records <code>last_observation</code>, <code>gap_hours</code>, <code>bridged</code>, <code>bridge_ratio</code> and <code>bridged_until</code>. It is saved in <code>meta.json</code> and shown in the dashboard.</li>
+<li><strong>The estimates are kept separate on purpose.</strong> Training reads only <code>pm25</code>, so fabricated values never become training targets. <code>run_forecast</code> merges them in only to give the model a starting point near <em>now</em>.</li>
+</ul>
+<hr />
+<h2 id="8-pipeline-py-the-command-line-orchestrator">8. <code>pipeline.py</code>: the command-line orchestrator</h2>
+<h3 id="8-1-small-helpers">8.1 Small helpers</h3>
+<ul>
+<li><strong><code>hourly_file()</code>, <code>meta_file()</code></strong> return the paths of <code>hourly.csv</code> and <code>meta.json</code> in <code>data/kolkata/processed/</code>.</li>
+<li><strong><code>_save_hourly(df, meta)</code></strong> writes <code>hourly.csv</code> (index label <code>time</code>) and <code>meta.json</code> (<code>default=str</code> serialises timestamps).</li>
+<li><strong><code>load_hourly()</code></strong> reads <code>hourly.csv</code> back with a UTC <code>DatetimeIndex</code>.</li>
+<li><strong><code>_combine(hist, recent)</code></strong> appends forecast-API rows only <strong>after</strong> the last archived hour. The archive is preferred wherever both exist, so training-like data is used for the past.</li>
+</ul>
+<h3 id="8-2-fetch-location-openaq-loc-sensors-history-join-one-station-s-sensors">8.2 <code>_fetch_location(openaq, loc_sensors, history)</code>: join one station's sensors</h3>
+<p>Problem: OpenAQ often lists the same CPCB monitor under two sensor IDs.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Example (Anand Vihar)</th>
+<th>Data it holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Old sensor ID</td>
+<td><code>384</code></td>
+<td>History</td>
+</tr>
+<tr>
+<td>New sensor ID</td>
+<td><code>12235610</code></td>
+<td>Current readings</td>
+</tr>
+</tbody>
+</table>
+<p>Picking the wrong one gives an empty series. The fix is to treat the <strong>station</strong> as the unit.</p>
+<ol>
+<li><strong>Load existing data.</strong> The station's saved file <code>pm25_location_&lt;id&gt;.csv</code> is read if present (incremental mode).</li>
+<li><strong>Download each sensor</strong>, in sensor-ID order:<ul>
+<li><strong>Start time:</strong><ul>
+<li>the sensor is already in the file → 3 days before its last saved hour (overlap catches late corrections)</li>
+<li>otherwise, a full build (<code>history=True</code>) → <code>TRAIN_START</code></li>
+<li>otherwise, an update → 10 days ago</li>
+</ul>
+</li>
+<li><strong>Skip check:</strong> a sensor whose <code>last</code> date is before the start time is skipped.</li>
+<li><strong>Download:</strong> <code>openaq.fetch_sensor_hours</code>, tagging each row with its <code>sensor_id</code>.</li>
+</ul>
+</li>
+<li><strong>Join:</strong> <code>sort_values(["time","sensor_id"]).drop_duplicates("time", keep="last")</code>. Where two sensors report the same hour, the <strong>larger (newer) sensor ID wins</strong>.</li>
+<li><strong>Save</strong> the file and return the series.</li>
+</ol>
+<h3 id="8-3-station-pm25-openaq-sensors-history-pm-station-row-sensor-ids">8.3 <code>_station_pm25(openaq, sensors, history) → (pm, station_row, sensor_ids)</code></h3>
+<p>This is the automatic station-selection policy.</p>
+<ol>
+<li><strong>Order:</strong> unique <code>location_id</code>s in rank order from <code>find_pm25_sensors</code>.</li>
+<li><strong>Stickiness:</strong> if <code>meta.json</code> shows a station used last time, that station goes first. History stays consistent, and the model isn't retrained on a different station by surprise.</li>
+<li><strong>Try up to 6 stations</strong> with <code>_fetch_location</code>. Accept the first with <strong>≥ 30 days</strong> of readings (≥ 24 h for an update) <strong>and</strong> a reading within the last <strong>14 days</strong>.</li>
+<li><strong>Fallback:</strong> if none qualifies, use the one with the most data. If none has any data, stop with a clear message.</li>
+</ol>
+<h3 id="8-4-fetch-demo-false-history-true">8.4 <code>fetch(demo=False, history=True)</code></h3>
+<ul>
+<li><strong>Demo mode</strong> builds data with <code>aq.demo.make_demo</code> and writes a <code>meta.json</code> marked <code>"mode": "demo"</code>.</li>
+<li><strong>Live mode:</strong><ol>
+<li>List the sensors and save <code>sensors.csv</code>.</li>
+<li>Choose the station and get its PM2.5 (<code>_station_pm25</code>).</li>
+<li><strong>Weather and CAMS history up to two days ago</strong> (the archive lags about 2 days):<ul>
+<li>downloaded when <code>history=True</code> or when no saved file exists</li>
+<li>otherwise read from <code>weather_history.csv</code> and <code>cams_history.csv</code></li>
+</ul>
+</li>
+<li>Fetch the recent and future weather and CAMS, and join them with <code>_combine</code>.</li>
+<li><strong>Build <code>meta</code></strong> with these fields: <code>mode</code>, <code>city</code>, <code>station</code>, <code>sensor_id</code> (list), <code>location_id</code>, <code>provider</code>, station <code>lat</code>/<code>lon</code>, <code>tz</code>.</li>
+</ol>
+</li>
+<li><strong>Both modes then run:</strong><ol>
+<li><code>clean_pm25</code> → <code>merge_sources</code> → <code>bridge_gap</code>.</li>
+<li>Add <code>qc</code>, <code>fetched_at</code>, <code>freshness</code> and <code>last_observation</code> to <code>meta</code>.</li>
+<li>If the station is late (more than 6 h), print a warning and list the 5 most recently reporting sensors (<code>_suggest_fresh_sensors</code>).</li>
+<li>Save everything.</li>
+</ol>
+</li>
+</ul>
+<h3 id="8-5-train-run-forecast-run-main">8.5 <code>train()</code>, <code>run_forecast()</code>, <code>run()</code>, <code>main()</code></h3>
+<ul>
+<li><strong><code>train()</code></strong> calls <code>model.train_and_backtest(load_hourly())</code> and prints a summary: MAE against persistence and CAMS, skill score, and alert statistics.</li>
+<li><strong><code>run_forecast()</code></strong>:<ol>
+<li>Loads the data and fills outage hours: <code>pm25 = pm25.combine_first(pm25_bridge)</code>.</li>
+<li>Loads the model and calls <code>model.forecast</code> and <code>model.driver_attribution</code>.</li>
+<li>Writes the CSVs and prints the forecast peak.</li>
+</ol>
+</li>
+<li>
+<p><strong><code>run(command, demo)</code></strong> maps commands to steps:</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Steps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fetch</code></td>
+<td>fetch with history</td>
+</tr>
+<tr>
+<td><code>update</code></td>
+<td>fetch without history, then forecast</td>
+</tr>
+<tr>
+<td><code>train</code></td>
+<td>train</td>
+</tr>
+<tr>
+<td><code>forecast</code></td>
+<td>forecast</td>
+</tr>
+<tr>
+<td><code>all</code></td>
+<td>fetch with history, train, forecast</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong><code>main()</code></strong> reads the command and the optional <code>--demo</code> flag, then calls <code>run</code>.</p>
+</li>
+</ul>
+<hr />
+<h2 id="9-machine-learning-design-and-why-gradient-boosting">9. Machine-learning design, and why gradient boosting</h2>
+<h3 id="9-1-framing-the-problem">9.1 Framing the problem</h3>
+<p>We want PM2.5 at every hour <strong>T+h</strong> for lead times <strong>h = 1…60</strong>, using only what is known at the issue time <strong>T</strong>:</p>
+<ul>
+<li>the station's readings up to T</li>
+<li>weather and CAMS forecasts for the coming hours</li>
+</ul>
+<p>This is <strong>supervised regression on a time series with exogenous (external) inputs</strong>.</p>
+<p>There are three standard ways to produce a multi-step forecast:</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>How</th>
+<th>Problem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Recursive</strong> (iterated one-step)</td>
+<td>Predict T+1, feed it back as a lag, predict T+2, …</td>
+<td>Errors <strong>compound</strong> over 60 steps, and the model is never trained on its own imperfect inputs</td>
+</tr>
+<tr>
+<td><strong>Direct, one model per horizon</strong></td>
+<td>Train 60 separate models</td>
+<td>60× the training cost; each model sees only its own slice of data; the forecast curve can be jagged</td>
+</tr>
+<tr>
+<td><strong>Direct multi-horizon, h as a feature</strong> ✅</td>
+<td>One model; each row is a (T, h) pair with <code>h</code> as an input</td>
+<td>One model shares what it learns across horizons; no compounding; smooth curve; trained once</td>
+</tr>
+</tbody>
+</table>
+<p>The project uses the third strategy. Each training row says, in effect:</p>
+<blockquote>
+<p>"At issue time T, the recent PM2.5 looked like this. At T+h the forecast weather is this, CAMS expects this change, and it will be this hour of the day. What was PM2.5 at T+h?"</p>
+</blockquote>
+<p><strong>Size:</strong> with an issue time every 3 hours (<code>ISSUE_STRIDE</code>) and 60 horizons, each year of data gives about 2,920 × 60 ≈ <strong>175,000 rows</strong>. Three to four years therefore give several hundred thousand rows.</p>
+<h3 id="9-2-why-gradient-boosted-decision-trees-gbdt">9.2 Why gradient-boosted decision trees (GBDT)?</h3>
+<p><strong>The short answer:</strong> this is a <strong>tabular</strong> problem, with a few dozen heterogeneous columns (lags, weather, calendar), hundreds of thousands of rows, many missing values, strongly <strong>non-linear effects and interactions</strong>, and a need for <strong>uncertainty</strong> and <strong>explanations</strong>. Gradient-boosted trees are the strongest, most practical tool for exactly this setting.</p>
+<p><strong>The long answer, point by point:</strong></p>
+<ol>
+<li><strong>State of the art on tabular data.</strong> Benchmarks repeatedly find that tree ensembles, gradient boosting especially, match or beat deep learning on medium-sized tabular datasets. They also need far less tuning and compute. See, for example, Grinsztajn, Oyallon &amp; Varoquaux, <em>"Why do tree-based models still outperform deep learning on tabular data?"</em>, NeurIPS 2022.</li>
+<li><strong>Non-linearity and thresholds.</strong> PM2.5 does not fall linearly with wind speed. Below about 1–2 m/s the air stagnates and pollution builds; above about 4 m/s extra wind changes little. Trees model such step-like, saturating responses naturally. A linear model would need hand-made transformations.</li>
+<li><strong>Interactions found automatically.</strong> The worst episodes need several conditions at once: a low mixing height <strong>and</strong> low wind <strong>and</strong> night <strong>and</strong> no rain <strong>and</strong> air arriving from the polluted plain. Each tree split conditions on the earlier splits, so trees learn these "AND" combinations without anyone specifying them.</li>
+<li><strong>Missing values handled natively.</strong> Station data has gaps, and some weather variables (mixing height) can be missing for whole periods. scikit-learn's <code>HistGradientBoostingRegressor</code> learns, at every split, which branch missing values should go to. No imputation is needed, and no rows are thrown away.</li>
+<li><strong>No feature scaling, robust to odd inputs.</strong> Trees only compare thresholds, so units (m, m/s, µg/m³, sines of hours) and outliers in the inputs don't matter.</li>
+<li><strong>Built-in quantile regression.</strong> Choosing <code>loss="quantile"</code> gives the 10th, 50th and 90th percentiles directly. This provides the uncertainty band and the exceedance probability, which a plain point forecast cannot.</li>
+<li><strong>Fast and light.</strong> Histogram-based training handles about 500,000 rows × 49 features in roughly a minute per model on a laptop CPU. No GPU is needed, so it runs on a student laptop and retrains in a few minutes.</li>
+<li><strong>Explainable.</strong> Permutation importance and counterfactual "what if the weather were typical" runs (section 11.7) show <em>why</em> a forecast is high. That matters for a public-health warning.</li>
+<li><strong>Proven for air quality.</strong> Gradient boosting (XGBoost, LightGBM and similar) is among the most common and best-performing methods in PM2.5 forecasting studies, especially when combined with meteorological forecasts and chemistry-model outputs, as here.</li>
+</ol>
+<p><strong>Alternatives considered:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Why not chosen (here)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linear / ridge regression</td>
+<td>Can't capture thresholds or interactions without heavy manual feature engineering; under-fits</td>
+</tr>
+<tr>
+<td>ARIMA / SARIMAX</td>
+<td>Essentially linear and (near-)univariate; weak with many non-linear weather drivers; fiddly for 60 horizons</td>
+</tr>
+<tr>
+<td>Prophet</td>
+<td>Built for trend and seasonality, not weather-driven episodes; no feature interactions</td>
+</tr>
+<tr>
+<td>Random forest</td>
+<td>Good, but averages deep trees (high variance, big models), usually less accurate than boosting, and scikit-learn has no native quantile loss for it</td>
+</tr>
+<tr>
+<td>XGBoost / LightGBM</td>
+<td>Same family of algorithm, equally good. scikit-learn's histogram GBDT is modelled on LightGBM. Using it keeps dependencies minimal (scikit-learn is already needed) and installs everywhere; swapping is a few lines</td>
+</tr>
+<tr>
+<td>LSTM / GRU / Temporal Fusion Transformer</td>
+<td>Need more data, careful tuning and often a GPU; harder to explain; with a few years of hourly data per station they rarely beat GBDT. <strong>A good extension</strong> for a comparison chapter</td>
+</tr>
+<tr>
+<td>SVR / k-nearest neighbours</td>
+<td>Scale poorly to hundreds of thousands of rows; need feature scaling; no native quantiles</td>
+</tr>
+</tbody>
+</table>
+<h3 id="9-3-how-gradient-boosting-works-in-this-model">9.3 How gradient boosting works (in this model)</h3>
+<p>Gradient boosting builds an <strong>additive model</strong> of many small regression trees:</p>
+<p>$$F_M(x) = F_0 + \eta \sum_{m=1}^{M} f_m(x)$$</p>
+<ul>
+<li><strong>Start:</strong> $F_0$ is a constant (for quantile loss, the τ-quantile of the target).</li>
+<li><strong>Each round m:</strong><ol>
+<li>Compute every row's <strong>negative gradient</strong> of the loss at the current prediction (the "pseudo-residual").</li>
+<li>Fit a small tree $f_m$ to these pseudo-residuals, so the tree learns <em>the direction in which the current model is wrong</em>.</li>
+<li>Set each leaf's output value by a line search (for quantile loss, the τ-quantile of the residuals in that leaf).</li>
+<li>Add the tree to the model, scaled down by the <strong>learning rate</strong> η.</li>
+</ol>
+</li>
+<li><strong>Repeat</strong> for <code>max_iter</code> rounds. Each tree corrects a little of what the previous ones got wrong, which is why it is called "boosting".</li>
+</ul>
+<p><strong>Histogram GBDT tricks</strong> (<code>HistGradientBoostingRegressor</code>):</p>
+<ul>
+<li>Each feature is binned into at most 255 bins. Split finding then scans bins instead of sorted values, which makes it much faster.</li>
+<li>Trees grow <strong>leaf-wise</strong> (best-first) up to <code>max_leaf_nodes</code> leaves.</li>
+<li>Missing values get their own learned direction at each split.</li>
+</ul>
+<p><strong>Quantile (pinball) loss</strong> for quantile level τ, with residual $u = y - \hat{y}$:</p>
+<p>$$L_\tau(u) = \max(\tau u,\ (\tau - 1)u)$$</p>
+<ul>
+<li>For τ = 0.9, under-predicting costs 9 times more than over-predicting. The minimiser is therefore the value that 90 % of outcomes fall below, which is the 90th percentile.</li>
+<li>The gradient is just $\tau - \mathbb{1}[y < \hat{y}]$. This makes training robust to outliers in the target.</li>
+</ul>
+<h3 id="9-4-hyperparameters-new-model-and-why">9.4 Hyperparameters (<code>_new_model</code>) and why</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>loss</code></td>
+<td><code>"quantile"</code></td>
+<td>Gives percentiles (uncertainty) instead of a single mean</td>
+</tr>
+<tr>
+<td><code>quantile</code></td>
+<td>0.1 / 0.5 / 0.9</td>
+<td>Lower band, median forecast, upper band. The 10–90 % band is an 80 % interval</td>
+</tr>
+<tr>
+<td><code>learning_rate</code></td>
+<td>0.06</td>
+<td>Small steps generalise better; 0.05–0.1 is standard</td>
+</tr>
+<tr>
+<td><code>max_iter</code></td>
+<td>300</td>
+<td>Number of trees. With η = 0.06 this reaches a good fit without long training</td>
+</tr>
+<tr>
+<td><code>max_leaf_nodes</code></td>
+<td>24</td>
+<td>Fairly shallow trees, enough for 4–5-way interactions. Earlier, deeper trees (48 leaves) over-fitted one year's patterns</td>
+</tr>
+<tr>
+<td><code>min_samples_leaf</code></td>
+<td>200</td>
+<td>Every leaf must be backed by at least 200 rows. This stops the model memorising rare situations, and matters because neighbouring (T, h) rows are highly correlated</td>
+</tr>
+<tr>
+<td><code>l2_regularization</code></td>
+<td>1.0</td>
+<td>Shrinks leaf values; adds stability</td>
+</tr>
+<tr>
+<td><code>early_stopping</code></td>
+<td>False</td>
+<td>Deterministic, full-length training. The held-out evaluation is done properly elsewhere (section 9.10)</td>
+</tr>
+<tr>
+<td><code>random_state</code></td>
+<td>0</td>
+<td>Reproducible results</td>
+</tr>
+</tbody>
+</table>
+<h3 id="9-5-target-transform-logarithm">9.5 Target transform: logarithm</h3>
+<ul>
+<li>PM2.5 is <strong>right-skewed</strong> (mostly 10–80, sometimes 300+), and its dynamics are <strong>multiplicative</strong>: a stagnant night might <em>double</em> pollution whatever the starting level.</li>
+<li>Modelling <code>log1p(PM)</code> turns ratios into differences, stabilises the variance, and stops the model wasting effort on a few extreme values. <code>log1p(x) = log(1+x)</code> is safe at 0.</li>
+<li><strong>Quantiles survive monotone transforms.</strong> The 90th percentile of log(PM) is the log of the 90th percentile of PM. The model can therefore be trained in log space and its quantiles converted back exactly with <code>expm1</code>.</li>
+</ul>
+<h3 id="9-6-the-key-design-decision-predict-the-change-not-the-level">9.6 The key design decision: predict the <em>change</em>, not the level</h3>
+<p><strong>The original version</strong> predicted <code>log1p(PM at T+h)</code> from absolute features. On Kolkata's real data it was <strong>worse than simple persistence</strong> ("the next hours equal the latest reading"):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>MAE at 1 h</th>
+<th>MAE at 24 h</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Original model</td>
+<td>7.0</td>
+<td>7.3</td>
+</tr>
+<tr>
+<td>Persistence</td>
+<td>1.6</td>
+<td>4.9</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The diagnosis</strong> (done by re-training on the user's data):</p>
+<ul>
+<li>Summer 2026 in Kolkata was about <strong>35 % cleaner than summer 2025</strong>.</li>
+<li>The model had learned "in this season, with this weather, PM is about 27". It kept forecasting about 27 while the station read about 17.</li>
+<li>It showed a +0.21 log-unit (about +24 %) bias even at 1 hour ahead.</li>
+<li>Season features (day-of-year) let the trees memorise <em>last year's dates</em>, and absolute CAMS and lag levels did the same.</li>
+</ul>
+<p><strong>The fix</strong>, implemented in <code>features.design()</code>:</p>
+<ol>
+<li><strong>Target = log change from now.</strong> <code>target = log1p(PM at T+h) − log1p(PM at T)</code>. The forecast is <code>PM_now × exp(predicted change)</code>, so it is always anchored to what the station measures today.</li>
+<li><strong>Scale-free inputs:</strong><ul>
+<li>every past-PM feature (lags, means, max, min, same hour yesterday) is expressed as <strong>log-ratio to now</strong></li>
+<li>variability is expressed relative to the current level</li>
+<li>CAMS enters only as its <strong>predicted change</strong> (<code>c_cams_change</code>, <code>c_cams24_change</code>), never as a level</li>
+</ul>
+</li>
+<li><strong>Drop day-of-year.</strong> With 1–3 years of data it only enables memorisation. Hour of day and weekday stay, because they repeat thousands of times.</li>
+</ol>
+<p><strong>Result:</strong> the model now beats persistence at every lead time and beats CAMS by about 3× (section 17).</p>
+<p><strong>Why this works:</strong> the model now learns <strong>physics-like rules</strong>, such as "a falling mixing height tonight plus weak wind → PM rises about 40 %". These transfer across years, stations and calibration changes. Absolute levels don't transfer.</p>
+<h3 id="9-7-blending-with-persistence">9.7 Blending with persistence</h3>
+<p>Even after the fix, at <strong>1–3 hours</strong> ahead the latest reading is very hard to beat, and the model's small predicted changes add noise. The code therefore shrinks the predicted change separately for each lead-time bucket:</p>
+<p>$$\log \hat{y}_{T+h} = \log y_T + w_b \cdot \widehat{\Delta}_{50}$$</p>
+<ul>
+<li><strong>Weights:</strong> $w_b \in [0, 1]$ is chosen on held-out data from a grid of 21 values (0, 0.05, …, 1) to minimise MAE.</li>
+<li><strong>Buckets</strong> (<code>H_EDGES</code>): 1, 2–3, 4–6, 7–12, 13–24, 25–36, 37–48 and 49–60 h.</li>
+<li><strong>Kolkata's learned weights:</strong> about 0.15 at 1 h, 0.35 at 2–3 h, 0.6 at 4–6 h, 0.7 at 7–12 h, 0.9 for 13–36 h, and 1.0 beyond 36 h. So the model is trusted more the further ahead it looks, which is the right behaviour.</li>
+</ul>
+<p>This is a simple, principled form of <strong>forecast combination</strong> (shrinkage toward a strong baseline).</p>
+<h3 id="9-8-calibrated-uncertainty-split-conformal-scaling">9.8 Calibrated uncertainty: split-conformal scaling</h3>
+<p>Quantile models are often over-confident: their 80 % band holds the truth only about 60–70 % of the time. The code fixes this with <strong>split-conformal calibration</strong> on held-out data:</p>
+<ol>
+<li><strong>Score every calibration row.</strong> For each row, compute how many band-half-widths the truth fell from the median, in log space:<ul>
+<li>below the median: $s = (\log q50 - \log y)/(\log q50 - \log q10)$</li>
+<li>above the median: $s = (\log y - \log q50)/(\log q90 - \log q50)$</li>
+</ul>
+</li>
+<li><strong>Pick the scale factor.</strong> For each lead-time bucket, $k_b$ is the <strong>80th percentile of s</strong>, clipped to [0.5, 4].</li>
+<li><strong>Rescale the band.</strong> Live forecasts stretch (or shrink) the distance from median to q10 and q90 by $k_b$.</li>
+</ol>
+<p>By construction, about 80 % of held-out outcomes then fall inside the band. The backtest confirms coverage of 0.79–0.82 on Kolkata.</p>
+<h3 id="9-9-from-quantiles-to-a-probability-of-exceeding-a-threshold">9.9 From quantiles to a probability of exceeding a threshold</h3>
+<p>The dashboard needs P(PM &gt; threshold) for any threshold the user picks. <code>exceed_prob()</code> fits a <strong>split-normal distribution in log space</strong> through the three quantiles:</p>
+<ul>
+<li>centre at log q50</li>
+<li>lower spread $\sigma_{lo} = (\log q50 - \log q10)/1.2816$ and upper spread $\sigma_{hi} = (\log q90 - \log q50)/1.2816$. Here 1.2816 is the z-score of the 90th percentile, and both spreads are floored at 0.02 to avoid dividing by zero.</li>
+<li>the spread on the threshold's side is used:</li>
+</ul>
+<p>$$P(\text{PM} > t) = 1 - \Phi\left(\frac{\log(1+t) - \log(1+q50)}{\sigma}\right)$$</p>
+<p>A split-normal allows <strong>skew</strong>: pollution can spike up much further than it can drop. The reliability diagram in the Track record tab checks the probabilities ("when we say 70 %, does it happen about 70 % of the time?").</p>
+<h3 id="9-10-honest-evaluation-no-leakage">9.10 Honest evaluation: no leakage</h3>
+<ul>
+<li><strong>Time-ordered split.</strong> The cut-off is the issue time at the 75th percentile:<ul>
+<li><strong>training</strong> uses only rows whose <em>target time</em> is before the cut-off, so no future value leaks in through long horizons</li>
+<li><strong>testing</strong> uses rows whose <em>issue time</em> is on or after the cut-off</li>
+</ul>
+</li>
+<li><strong>Calibration and scoring are separate.</strong> Inside the test period, <strong>alternate weeks</strong> are used to fit the blending weights and conformal scales, and the <strong>other weeks</strong> are used for every reported number. Alternating weeks (rather than first half / second half) means both halves cover the same seasons.</li>
+<li><strong>Baselines:</strong><ul>
+<li>persistence (<code>p_pm</code>), the hardest to beat at short lead times</li>
+<li>same hour on the last observed day (<code>p_same_hour</code>), which captures the daily cycle</li>
+<li>raw CAMS, which is what apps show</li>
+</ul>
+</li>
+<li><strong>Final model:</strong> after evaluation, the models are <strong>refit on all the data</strong> for live forecasting. The calibration and blending learned out of sample are kept. This is standard practice: evaluate honestly, then use every bit of data.</li>
+</ul>
+<h3 id="9-11-explainability">9.11 Explainability</h3>
+<ul>
+<li><strong>Global: permutation importance.</strong> On up to 15,000 test rows, each feature is shuffled in turn and the increase in error is measured, three repeats per feature. A feature whose shuffling hurts most matters most.</li>
+<li>
+<p><strong>Local: counterfactual driver attribution.</strong> For <em>today's</em> forecast, one weather group at a time is replaced by its <strong>typical value for this month and hour</strong> (the station's own climatology, a median), and the model is re-run. The difference shows how many µg/m³ that factor adds compared with a normal day. The five groups are:</p>
+<ul>
+<li>wind</li>
+<li>mixing height</li>
+<li>rain and clouds</li>
+<li>temperature, humidity and pressure</li>
+<li>regional CAMS</li>
+</ul>
+<p>This is a simple, model-agnostic, causal-style explanation that people understand: "low wind adds +23 µg/m³ to tomorrow night".</p>
+</li>
+</ul>
+<hr />
+<h2 id="10-aq-features-py-feature-engineering">10. <code>aq/features.py</code>: feature engineering</h2>
+<p>The module works in three stages:</p>
+<ol>
+<li><code>series_features</code> computes helper columns <strong>once per hour</strong>.</li>
+<li><code>make_samples</code> turns them into <strong>(T, h) rows</strong>.</li>
+<li><code>design</code> converts those rows into the <strong>scale-free model matrix</strong>.</li>
+</ol>
+<p>Column prefixes say where a feature comes from:</p>
+<table>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>p_</code></td>
+<td>measured PM2.5, taken at issue time T</td>
+</tr>
+<tr>
+<td><code>w_</code></td>
+<td>weather, taken at target time T+h</td>
+</tr>
+<tr>
+<td><code>c_</code></td>
+<td>CAMS</td>
+</tr>
+<tr>
+<td><code>k_</code></td>
+<td>calendar</td>
+</tr>
+<tr>
+<td><code>d_</code></td>
+<td>change between T and T+h</td>
+</tr>
+<tr>
+<td><code>path_</code></td>
+<td>conditions along the way from T to T+h</td>
+</tr>
+</tbody>
+</table>
+<p>Constants: <code>PM_LAGS = (1, 2, 3, 6, 12, 24, 48)</code> and <code>WEATHER_COLS</code> (10 weather variables).</p>
+<h3 id="10-1-series-features-df-dataframe">10.1 <code>series_features(df) → DataFrame</code></h3>
+<p>Computed on the merged hourly table (index = UTC hour):</p>
+<p><strong>PM history (<code>p_</code>), known at the row's own hour:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Definition</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>p_pm</code></td>
+<td>PM2.5 now</td>
+<td>The anchor of the forecast</td>
+</tr>
+<tr>
+<td><code>p_lag1 … p_lag48</code></td>
+<td>PM 1, 2, 3, 6, 12, 24 and 48 h ago</td>
+<td>Short memory and the daily cycle</td>
+</tr>
+<tr>
+<td><code>p_mean3/6/24/72</code></td>
+<td>Rolling means (need at least half the window present)</td>
+<td>Smoothed recent levels; the 72-h mean shows how persistent an episode is</td>
+</tr>
+<tr>
+<td><code>p_std24</code>, <code>p_max24</code>, <code>p_min24</code></td>
+<td>24-h variability and extremes</td>
+<td>Volatile or stable regime</td>
+</tr>
+<tr>
+<td><code>p_trend3</code>, <code>p_trend24</code></td>
+<td>log change over 3 h and 24 h</td>
+<td>Build-up or clean-out already under way</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Weather (<code>w_</code>):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Definition</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>w_temp</code> … <code>w_blh</code></td>
+<td>Raw variables</td>
+<td>Direct drivers</td>
+</tr>
+<tr>
+<td><code>w_wind_u</code>, <code>w_wind_v</code></td>
+<td>Wind as east/north components: −speed·sin(dir), −speed·cos(dir)</td>
+<td>Direction is circular (359° ≈ 1°). Components make it continuous <strong>and</strong> weight it by speed</td>
+</tr>
+<tr>
+<td><code>w_vent</code></td>
+<td><strong>Ventilation index</strong> = wind speed × mixing height (m²/s)</td>
+<td>The classic air-pollution dispersion indicator: how much air is available to dilute emissions. Below about 2,000 m²/s means stagnant</td>
+</tr>
+<tr>
+<td><code>w_log_vent</code></td>
+<td>log(1 + ventilation)</td>
+<td>Compresses its huge range</td>
+</tr>
+<tr>
+<td><code>w_rain6</code>, <code>w_rain24</code></td>
+<td>Rain over the last 6 h and 24 h</td>
+<td>Wash-out has a lingering effect</td>
+</tr>
+<tr>
+<td><code>w_wind12</code>, <code>w_logvent12</code></td>
+<td>12-h means</td>
+<td>Has the air been stagnant for a while?</td>
+</tr>
+<tr>
+<td><code>w_blh_max24</code></td>
+<td>Highest mixing height in the last 24 h</td>
+<td>How well yesterday's daytime mixing cleaned the air</td>
+</tr>
+<tr>
+<td><code>w_dpress24</code>, <code>w_dtemp24</code></td>
+<td>24-h pressure and temperature change</td>
+<td>Air-mass changes and fronts</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Every weather column is always created</strong> (filled with NaN if a variable is missing). The model's column list must be identical in training and live use.</p>
+<p><strong>CAMS (<code>c_</code>):</strong> <code>c_cams</code> (hourly) and <code>c_cams24</code> (24-h mean).</p>
+<p><strong>Calendar (<code>k_</code>), in the city's local time:</strong></p>
+<ul>
+<li><code>k_hour_sin</code>, <code>k_hour_cos</code>: hour of day on a circle, so 23:00 and 00:00 are close.</li>
+<li><code>k_dow</code>: day of week, 0 = Monday.</li>
+<li><code>k_doy_sin</code>, <code>k_doy_cos</code>: day of year. These are kept in the raw table but <strong>dropped by <code>design</code></strong> (section 9.6).</li>
+</ul>
+<h3 id="10-2-make-samples-sf-issue-pos-horizons-with-target-true-dataframe">10.2 <code>make_samples(sf, issue_pos, horizons, with_target=True) → DataFrame</code></h3>
+<p>This builds the (T, h) rows with numpy integer indexing. There are no Python loops, which matters at about 1 million rows.</p>
+<div class="hl"><pre><span></span><code><span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">issue_pos</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">horizons</span><span class="p">))</span>   <span class="c1"># issue row index, repeated for each h</span>
+<span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">horizons</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">issue_pos</span><span class="p">))</span>     <span class="c1"># 1..60 for each issue time</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">I</span> <span class="o">+</span> <span class="n">H</span>                                 <span class="c1"># target row index</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">sf</span><span class="p">[</span><span class="n">p_cols</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="n">I</span><span class="p">]</span>              <span class="c1"># PM history at the issue time</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">sf</span><span class="p">[</span><span class="n">tgt_cols</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="n">V</span><span class="p">]</span>            <span class="c1"># weather / CAMS / calendar at the target time</span>
+</code></pre></div>
+
+<p><strong>Rows whose target lies beyond the table are dropped.</strong> The function then adds:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>h</code></td>
+<td>Lead time; this is how one model covers every horizon</td>
+</tr>
+<tr>
+<td><code>d_log_vent</code>, <code>d_temp</code>, <code>d_wind</code></td>
+<td>Weather at T+h minus weather at T. A <em>falling</em> ventilation is the classic sign that an episode is coming</td>
+</tr>
+<tr>
+<td><code>c_bias_now</code>, <code>c_cams_adj</code></td>
+<td>CAMS's current local bias and a bias-corrected CAMS (kept for reference; removed by <code>design</code>)</td>
+</tr>
+<tr>
+<td><code>path_log_vent</code></td>
+<td><strong>Mean</strong> log-ventilation over (T, T+h]</td>
+</tr>
+<tr>
+<td><code>path_rain</code></td>
+<td><strong>Total</strong> rain over (T, T+h]</td>
+</tr>
+<tr>
+<td><code>p_same_hour</code></td>
+<td>PM at the same clock hour on the most recent fully observed day</td>
+</tr>
+<tr>
+<td><code>c_cams_T</code></td>
+<td>CAMS at the issue time</td>
+</tr>
+<tr>
+<td><code>issue_time</code>, <code>target_time</code></td>
+<td>Bookkeeping</td>
+</tr>
+<tr>
+<td><code>y</code></td>
+<td>PM2.5 at T+h, the target</td>
+</tr>
+</tbody>
+</table>
+<p><strong>How the path features are computed:</strong> with <strong>cumulative sums</strong>, <code>(cs[V+1] − cs[I+1])</code>, the sum over any window is one subtraction. This gives "conditions along the way" for every (T, h) pair at once. The intuition is that pollution at T+h depends on the whole journey of the air, not just the weather at the final hour.</p>
+<p><strong>How <code>p_same_hour</code> is computed:</strong> <code>back = 24·ceil(h/24)</code> ensures the value comes from a day that was <em>already observed at T</em>, so there is no leakage.</p>
+<h3 id="10-3-feature-columns-x">10.3 <code>feature_columns(X)</code></h3>
+<p>All columns except <code>issue_time</code>, <code>target_time</code> and <code>y</code>.</p>
+<h3 id="10-4-design-x-r-base">10.4 <code>design(X) → (R, base)</code></h3>
+<p>This applies the scale-free transformation (section 9.6).</p>
+<ul>
+<li><strong><code>base</code></strong> is <code>log1p(PM now)</code>, falling back to the 3-h mean if the current hour is missing. It is the persistence anchor.</li>
+<li><strong>Columns dropped</strong> (<code>_ABSOLUTE</code>): <code>p_pm</code>, <code>c_cams</code>, <code>c_cams24</code>, <code>c_cams_adj</code>, <code>c_bias_now</code>, <code>c_cams_T</code>, <code>k_doy_sin</code>, <code>k_doy_cos</code>.</li>
+<li><strong>Each <code>p_</code> feature</strong> becomes <code>log1p(value) − base</code>, the log-ratio to now. The exceptions:<ul>
+<li><code>p_trend3</code> and <code>p_trend24</code> are already log differences and are kept as they are.</li>
+<li><code>p_std24</code> becomes the coefficient of variation (std ÷ current level).</li>
+</ul>
+</li>
+<li><strong>New features:</strong><ul>
+<li><code>c_cams_change = log1p(CAMS at T+h) − log1p(CAMS at T)</code></li>
+<li><code>c_cams24_change</code>, the same for the 24-h mean</li>
+</ul>
+</li>
+<li><strong>±inf is replaced with NaN</strong>, which the trees handle.</li>
+</ul>
+<p><strong>The final matrix has 49 inputs:</strong></p>
+<ul>
+<li><code>h</code></li>
+<li>16 relative PM features</li>
+<li>21 weather features</li>
+<li>3 calendar features (hour sine/cosine, weekday)</li>
+<li>3 change features (<code>d_</code>)</li>
+<li>2 path features</li>
+<li><code>p_same_hour</code></li>
+<li>2 CAMS-change features</li>
+</ul>
+<hr />
+<h2 id="11-aq-model-py-training-calibration-evaluation-forecasting-explanation">11. <code>aq/model.py</code>: training, calibration, evaluation, forecasting, explanation</h2>
+<h3 id="11-1-constants">11.1 Constants</h3>
+<ul>
+<li><strong><code>Z90 = 1.28155</code></strong> is the standard-normal z-score of the 90th percentile.</li>
+<li>
+<p><strong><code>DRIVER_GROUPS</code></strong> maps the five explanation groups to raw columns:</p>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Columns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wind</td>
+<td><code>wind_speed</code>, <code>wind_dir</code>, <code>wind_gust</code></td>
+</tr>
+<tr>
+<td>Mixing height</td>
+<td><code>blh</code></td>
+</tr>
+<tr>
+<td>Rain &amp; clouds</td>
+<td><code>precip</code>, <code>cloud</code></td>
+</tr>
+<tr>
+<td>Temperature, humidity &amp; pressure</td>
+<td><code>temp</code>, <code>rh</code>, <code>dewpoint</code>, <code>radiation</code>, <code>pressure</code></td>
+</tr>
+<tr>
+<td>Regional pollution</td>
+<td><code>cams_pm25</code></td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong><code>H_EDGES = [1, 2, 4, 7, 13, 25, 37, 49, ∞]</code></strong> defines the lead-time buckets used for blending and calibration. They are finer at short lead times, where behaviour changes quickly.</p>
+</li>
+</ul>
+<h3 id="11-2-helper-functions">11.2 Helper functions</h3>
+<ul>
+<li><strong><code>_new_model(q)</code></strong> returns a configured <code>HistGradientBoostingRegressor</code> for quantile <em>q</em> (hyperparameters in section 9.4).</li>
+<li><strong><code>_norm_cdf(z)</code></strong> is the standard normal cumulative distribution, computed with <code>math.erf</code> so scipy isn't needed. It returns an empty array for empty input. A dashboard crash taught us that <code>np.vectorize</code> fails on size-0 input unless <code>otypes</code> is given.</li>
+<li><strong><code>exceed_prob(q10, q50, q90, threshold)</code></strong> is the split-normal probability from section 9.9. It is vectorised over any number of hours.</li>
+<li><strong><code>_bucket(h)</code></strong> maps a lead time to its bucket index with <code>np.searchsorted(H_EDGES, h, side="right") − 1</code>.</li>
+<li><strong><code>_raw_residuals(models, R)</code></strong> returns the three models' predicted <em>log changes</em> (n × 3), <strong>sorted per row</strong>, so q10 ≤ q50 ≤ q90 always holds. Three independent quantile models can otherwise "cross".</li>
+<li><strong><code>_assemble(r, base, h, blend, scale)</code></strong> turns log changes into PM2.5 quantiles:</li>
+</ul>
+<div class="hl"><pre><span></span><code><span class="n">mid</span> <span class="o">=</span> <span class="n">r</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]]</span>                                            <span class="c1"># median log change</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="n">w</span> <span class="o">*</span> <span class="n">mid</span> <span class="o">+</span> <span class="p">(</span><span class="n">r</span> <span class="o">-</span> <span class="n">mid</span><span class="p">)</span> <span class="o">*</span> <span class="n">k</span>                         <span class="c1"># blend the centre, scale the band</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="n">expm1</span><span class="p">(</span><span class="n">P</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+
+<ul>
+<li><code>w</code> (blend) moves the centre toward persistence.</li>
+<li><code>k</code> (conformal) widens or narrows the band around the centre.</li>
+<li><strong><code>predict_quantiles(bundle, X)</code></strong> chains <code>design</code> → <code>_raw_residuals</code> → <code>_assemble</code>, using the bundle's saved column order, blend weights and scales.</li>
+<li><strong><code>fit_blend(r50, base, y, h)</code></strong> chooses, for each bucket, the weight from {0, 0.05, …, 1} that minimises MAE on the calibration weeks.</li>
+<li><strong><code>climatology(df)</code></strong> is the median of every driver column by (local month, local hour). It is saved in the bundle as the "typical day" for driver attribution.</li>
+</ul>
+<h3 id="11-3-build-training-set-df">11.3 <code>build_training_set(df)</code></h3>
+<ol>
+<li><code>series_features(df)</code>.</li>
+<li>Choose issue positions where PM is observed, skipping the first 72 h (so lags exist) and taking every 3rd hour.</li>
+<li><code>make_samples</code> for h = 1…60.</li>
+<li>Keep only rows whose target <code>y</code> is observed.</li>
+</ol>
+<h3 id="11-4-train-and-backtest-df-fit-final-true">11.4 <code>train_and_backtest(df, fit_final=True)</code></h3>
+<ol>
+<li><strong>Build the samples.</strong></li>
+<li><strong>Split by time.</strong> The cut-off is the issue time at the 75 % point:<ul>
+<li>train = rows with <code>target_time &lt; cutoff</code></li>
+<li>test = rows with <code>issue_time ≥ cutoff</code></li>
+</ul>
+</li>
+<li><strong>Fit three quantile models</strong> on <code>design(train)</code> with target <code>log1p(y) − base</code>.</li>
+<li><strong>Predict the test set</strong> (raw log changes).</li>
+<li><strong>Split the test set into alternating weeks.</strong> Odd weeks are used to fit the blend weights and then the conformal scales (computed on blended predictions); even weeks are used for scoring.</li>
+<li><strong>Score</strong> the even weeks with <code>evaluate</code> and attach <code>interval_scale</code>, <code>blend_weight</code> and the period dates to the report.</li>
+<li><strong>Compute permutation importance</strong> of the median model on up to 15,000 scored rows, scored by mean absolute error of the log change, 3 repeats. The top 20 are kept.</li>
+<li><strong>Save</strong> <code>backtest_predictions.csv</code> for h ∈ {1, 3, 6, 12, 24, 36, 48}. The Track record tab plots it.</li>
+<li><strong>Refit</strong> the three models on <em>all</em> samples for live use.</li>
+<li>
+<p><strong>Save the bundle</strong> (joblib) with these fields:</p>
+<ul>
+<li><code>models</code> (q → fitted model), <code>cols</code> (feature order), <code>scale</code>, <code>blend</code></li>
+<li><code>version: 2</code> (format marker), <code>climatology</code>, <code>trained_until</code>, <code>city</code></li>
+</ul>
+<p>Also save <code>backtest.json</code>.</p>
+</li>
+</ol>
+<h3 id="11-5-interval-scale-cal-target-0-8">11.5 <code>interval_scale(cal, target=0.8)</code></h3>
+<p>This is the conformal factor per bucket (section 9.8). The <code>np.clip(…, 1e-3)</code> guards against zero-width bands. The <code>[0.5, 4]</code> clip stops a tiny bucket from producing absurd bands.</p>
+<h3 id="11-6-evaluate-test-and-mae">11.6 <code>evaluate(test)</code> and <code>_mae</code></h3>
+<ul>
+<li><code>_mae(a, b)</code> ignores non-finite pairs. CAMS can be missing in early periods.</li>
+<li><strong>For each lead time h</strong> it computes:<ul>
+<li>MAE of the model median, persistence, same hour and CAMS</li>
+<li>RMSE of the model</li>
+<li><strong>coverage_80</strong>: the share of outcomes inside [q10, q90]</li>
+</ul>
+</li>
+<li><strong>Summaries</strong> for 0–24 h and 24–48 h: mean metrics plus the <strong>skill score</strong> <code>1 − MAE_model / MAE_baseline</code>. Skill above 0 means the model beats the baseline; 0.24 means 24 % less error.</li>
+<li>
+<p><strong>Warning verification</strong>, at 24–48 h lead time, for thresholds 60, 90 and 120. A warning is issued when P ≥ 0.5.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Formula</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POD (probability of detection)</td>
+<td>hits / (hits + misses)</td>
+<td>Share of real exceedances that were warned about</td>
+</tr>
+<tr>
+<td>FAR (false-alarm ratio)</td>
+<td>false alarms / (hits + false alarms)</td>
+<td>Share of warnings that didn't happen</td>
+</tr>
+<tr>
+<td>CSI (critical success index)</td>
+<td>hits / (hits + misses + false alarms)</td>
+<td>Combined score, 1 = perfect</td>
+</tr>
+<tr>
+<td>Brier score</td>
+<td>mean((p − event)²)</td>
+<td>Accuracy of the probabilities; lower is better</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong>Reliability</strong> (threshold 90): probabilities are binned into tenths, and for each bin with at least 30 cases the mean forecast probability is compared with the observed frequency.</p>
+</li>
+</ul>
+<h3 id="11-7-live-forecasting">11.7 Live forecasting</h3>
+<ul>
+<li><strong><code>load_bundle()</code></strong> reads the joblib file.</li>
+<li><strong><code>_tail(df)</code></strong> keeps the window from 200 h before the last observation to 60 h after it. That is enough for every lag and rolling window, and fast.</li>
+<li><strong><code>_forecast_frame(bundle, df)</code></strong> runs <code>series_features</code> on the tail, takes the last row with an observation as T, and calls <code>make_samples</code> for h = 1…60 without a target.</li>
+<li><strong><code>forecast(bundle, df)</code></strong>:<ul>
+<li>refuses old bundles (<code>version &lt; 2</code>) with an instruction to retrain, because the feature design changed</li>
+<li>returns <code>issue_time</code>, <code>target_time</code>, <code>h</code>, <code>cams</code>, <code>q10</code>, <code>q50</code> and <code>q90</code></li>
+</ul>
+</li>
+<li>
+<p><strong><code>driver_attribution(bundle, df, fc)</code></strong>, for each driver group:</p>
+<ol>
+<li>Copy the tail.</li>
+<li>Replace the group's columns, from 24 h before T onwards, with the climatology value for each hour's (month, hour). The original value is kept where the climatology is missing.</li>
+<li>Rebuild the forecast and predict the median.</li>
+<li><code>effect = actual forecast − counterfactual forecast</code>, averaged over hours 1–24 and 25–48 after T.</li>
+</ol>
+<p>A positive effect means the factor is making the air <strong>worse</strong> than a typical day.</p>
+</li>
+</ul>
+<hr />
+<h2 id="12-aq-insights-py-from-numbers-to-decisions">12. <code>aq/insights.py</code>: from numbers to decisions</h2>
+<p><strong><code>category(v)</code></strong> returns the CPCB PM2.5 category name and colour for a concentration. It uses the first band whose upper limit is ≥ v, and returns ("No data", grey) for NaN.</p>
+<p><strong>India CPCB AQI:</strong></p>
+<ul>
+<li><strong><code>_AQI_BP</code></strong> holds the breakpoints:<ul>
+<li>PM2.5 <code>[0, 30, 60, 90, 120, 250, 500]</code> maps to AQI <code>[0, 50, 100, 200, 300, 400, 500]</code></li>
+<li>PM10 <code>[0, 50, 100, 250, 350, 430, 600]</code> maps to the same AQI scale</li>
+</ul>
+</li>
+<li><strong><code>sub_index(conc, pollutant)</code></strong> does piecewise-linear interpolation between breakpoints (<code>np.interp</code>), capped at 500. This is the CPCB formula $I = I_{lo} + \frac{I_{hi}-I_{lo}}{C_{hi}-C_{lo}}(C - C_{lo})$.</li>
+<li><strong><code>aqi(pm25, pm10)</code></strong> is the <strong>maximum</strong> of the available sub-indices, as CPCB defines it. It returns NaN if neither is available.</li>
+<li><strong><code>aqi_category(a)</code></strong> maps an AQI value to its category and colour.</li>
+<li><strong>About averaging:</strong> CPCB defines the AQI on <strong>24-hour averages</strong>, so the dashboard always passes 24-h means. The hourly colour strip uses PM2.5 concentration categories, labelled as such.</li>
+</ul>
+<p><strong><code>localize(fc)</code></strong> parses the forecast's time columns as UTC and adds <code>local_time</code> in the city's time zone.</p>
+<p><strong><code>upcoming(fc, now, hours=48)</code></strong> returns the forecast rows strictly after the current hour, up to 48 h ahead. Because the forecast starts at the <em>last observation</em>, which may be hours old, this trims any part already in the past.</p>
+<p><strong><code>alert_summary(fc, threshold, now)</code></strong> is the early-warning logic.</p>
+<ul>
+<li><strong>No upcoming rows:</strong> returns level "Unknown" with a message to update.</li>
+<li><strong>Otherwise:</strong><ul>
+<li><code>p</code> = hourly exceedance probability; <code>pmax</code> is its maximum</li>
+<li><code>peak</code> = the hour with the highest median, with its q10 and q90</li>
+<li>"likely" hours are those with p ≥ 0.5; they give the start time, end time, lead time (hours from now to the first likely hour) and duration</li>
+</ul>
+</li>
+<li>
+<p><strong>Levels:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EMERGENCY</td>
+<td>peak median &gt; 250 and p ≥ 0.5</td>
+</tr>
+<tr>
+<td>WARNING</td>
+<td>max p ≥ 0.6</td>
+</tr>
+<tr>
+<td>WATCH</td>
+<td>max p ≥ 0.3</td>
+</tr>
+<tr>
+<td>CLEAR</td>
+<td>otherwise</td>
+</tr>
+</tbody>
+</table>
+<p>The thresholds favour <strong>early detection</strong> (Watch at 30 %) while reserving Warning for likely events, the same trade-off weather services make.</p>
+</li>
+<li>
+<p><strong>Message templates:</strong></p>
+<ul>
+<li><em>clear</em>: "No exceedance … (highest chance x %)"</li>
+<li><em>likely</em>: start, lead time, duration, peak with its 80 % range, and the maximum chance</li>
+<li><em>possible</em>: the most likely hour</li>
+</ul>
+</li>
+</ul>
+<p><strong><code>daily_outlook(fc, now)</code></strong> covers today, tomorrow and the day after (local dates).</p>
+<ul>
+<li>Averages q10, q50 and q90 over each day's hours, and keeps only days with at least 12 hours left.</li>
+<li>Adds:<ul>
+<li><code>p_naaqs</code>, the chance the 24-h mean exceeds 60</li>
+<li><code>x_who</code>, the multiple of the WHO 15 guideline</li>
+<li><code>cigarettes = q50 / 22</code> (Berkeley Earth's rule of thumb that breathing 22 µg/m³ for a day is like smoking about one cigarette)</li>
+<li><code>category</code></li>
+</ul>
+</li>
+<li><em>Caveat (documented):</em> averaging hourly quantiles makes the daily band slightly too wide, which is conservative.</li>
+</ul>
+<p><strong><code>best_windows(fc, duration=2, start_hour=6, end_hour=21, now, per_day=1)</code></strong> finds the best time to go out.</p>
+<ul>
+<li>Rolling mean of the median over <code>duration</code> hours (<code>shift(-(duration-1))</code> aligns each window with its start hour).</li>
+<li>Keeps only windows that start at or after 06:00 and end by 22:00.</li>
+<li>For each day, picks the window with the lowest mean, and also reports that day's worst window, so the dashboard can say "about X µg/m³ cleaner than the worst slot".</li>
+</ul>
+<p><strong><code>driver_sentences(drivers, col="effect_24_48h", min_effect=3)</code></strong> turns attribution numbers into plain sentences.</p>
+<ul>
+<li>Ignores effects smaller than 3 µg/m³.</li>
+<li>Sorts by absolute effect.</li>
+<li>Uses a physical explanation for each group and sign, for example "a low mixing layer traps pollution near the ground".</li>
+</ul>
+<p><strong><code>HEALTH_ADVICE</code></strong> gives a recommendation for each category, based on CPCB and WHO guidance. It escalates from "enjoy outdoor activities" to "stay indoors with filtered air".</p>
+<hr />
+<h2 id="13-aq-ui-py-the-visual-layer">13. <code>aq/ui.py</code>: the visual layer</h2>
+<p><strong>Design tokens:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>INK</code></td>
+<td>#1B2A41</td>
+<td>Deep slate: headings and the header background</td>
+</tr>
+<tr>
+<td><code>SKY</code></td>
+<td>#EEF3F8</td>
+<td>Pale sky: page background</td>
+</tr>
+<tr>
+<td><code>PAPER</code></td>
+<td>#FFFFFF</td>
+<td>White surfaces</td>
+</tr>
+<tr>
+<td><code>HAZE</code></td>
+<td>#7C8DA3</td>
+<td>Secondary text</td>
+</tr>
+<tr>
+<td><code>LINE</code></td>
+<td>#DCE3EC</td>
+<td>Borders and grid</td>
+</tr>
+<tr>
+<td><code>SIGNAL</code></td>
+<td>#2F6FDE</td>
+<td>The forecast line and interactive accent</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Fonts:</strong> <strong>Bricolage Grotesque</strong> for headings and numbers; <strong>Atkinson Hyperlegible</strong> for body text. Atkinson Hyperlegible was designed by the Braille Institute for legibility, which suits health information.</li>
+<li><strong>Category colours</strong> live in <code>config.CATEGORIES</code> and <code>insights.AQI_CATEGORIES</code>, so every chart uses the same palette.</li>
+<li><strong><code>LEVEL_COLORS</code></strong> gives a chip colour for each alert level.</li>
+</ul>
+<p><strong><code>CSS</code></strong> is one stylesheet injected into the Streamlit page. It covers:</p>
+<ul>
+<li>fonts, the page background, and the sidebar</li>
+<li>the tab style, with an underline in the signal colour</li>
+<li>white bordered panels around charts and tables, and metric tiles</li>
+<li>a keyboard-focus outline</li>
+<li>the header block (<code>.hero</code>), the colour strip (<code>.strip</code>) with its axis and legend</li>
+<li>stat tiles (<code>.tiles</code>), day cards (<code>.day</code>)</li>
+<li>a mobile breakpoint</li>
+</ul>
+<p>It targets Streamlit's <code>data-testid</code> attributes.</p>
+<p><strong><code>inject()</code></strong>:</p>
+<ol>
+<li>Writes the CSS into the page.</li>
+<li>Registers a <strong>Plotly template</strong> named <code>airwatch</code>: fonts, white background, light gridlines, a colour sequence starting with the forecast blue, and a matching hover style.</li>
+<li>Sets it as the default (<code>plotly_white+airwatch</code>), so every chart matches without per-chart styling.</li>
+</ol>
+<p><strong><code>_esc(x)</code></strong> HTML-escapes text, because station names come from an external API.</p>
+<p><strong><code>hero(place, subline, aqi_value, …, hours, threshold, advice)</code></strong> builds the header block. It is the signature element:</p>
+<ul>
+<li>Left side: the city in large type, with the station and how long ago it reported. Right side: the AQI as a large number in its category colour.</li>
+<li>Below: an alert chip (Clear / Watch / Warning / Emergency) and the message.</li>
+<li><strong>The 48-hour strip:</strong><ul>
+<li>one <code>&lt;div&gt;</code> per hour, coloured by forecast category, with a hover tooltip ("Sat 03 Oct 21:30 · 118 µg/m³ · Poor")</li>
+<li>the class <code>over</code> draws a <strong>white tick</strong> on hours above the user's threshold</li>
+<li>axis labels: "now", day changes ("Sat 03") and "noon"</li>
+</ul>
+</li>
+<li>A legend of the categories, and the health advice.</li>
+</ul>
+<p><strong><code>tiles(items)</code></strong> draws a responsive grid of stat tiles from (label, value-HTML, sub-text, colour) tuples.</p>
+<p><strong><code>brand()</code></strong> is the name block at the top of the sidebar ("Kolkata Air Quality Early Warning").</p>
+<hr />
+<h2 id="14-app-py-the-streamlit-dashboard">14. <code>app.py</code>: the Streamlit dashboard</h2>
+<h3 id="14-1-how-streamlit-runs-this-file">14.1 How Streamlit runs this file</h3>
+<p>Streamlit re-executes <code>app.py</code> from top to bottom <strong>every time the user interacts</strong>: moving a slider, choosing a profile, clicking a button. Two mechanisms make this work:</p>
+<ul>
+<li><strong><code>@st.cache_data</code></strong> caches function results by their arguments, so the CSV and JSON files are not re-read on every interaction. Parameters whose names start with <code>_</code> are <em>not</em> part of the cache key.</li>
+<li><strong><code>st.rerun()</code></strong> restarts the script immediately, for example after a refresh.</li>
+</ul>
+<h3 id="14-2-page-set-up-and-data-loading">14.2 Page set-up and data loading</h3>
+<ul>
+<li><code>st.set_page_config(layout="wide")</code>, then <code>ui.inject()</code> (CSS and chart template).</li>
+<li><strong><code>_mtime(path)</code></strong> returns a file's modification time, or 0 if it is missing.</li>
+<li><strong><code>load_all(_stamp)</code></strong> reads <code>hourly.csv</code>, <code>meta.json</code>, <code>forecast.csv</code>, <code>drivers.csv</code>, <code>backtest.json</code> and <code>backtest_predictions.csv</code>. <code>_stamp</code> is the sum of the files' modification times, and the cache is cleared after every refresh, so new data always appears.</li>
+<li><strong>First-run guard:</strong> if <code>hourly.csv</code>, <code>forecast.csv</code> or the model file is missing, the page shows the two commands to build the forecast (real data or <code>--demo</code>) and stops with <code>st.stop()</code>.</li>
+</ul>
+<h3 id="14-3-sidebar">14.3 Sidebar</h3>
+<ul>
+<li><strong>Your warning:</strong><ul>
+<li>a profile selectbox (default: Sensitive)</li>
+<li>a threshold slider (15–250 µg/m³, default from the profile)</li>
+<li>the outdoor-activity length (1–4 h)</li>
+</ul>
+</li>
+<li><strong>Data:</strong><ul>
+<li>the station in use (or "Demo data" in demo mode)</li>
+<li><strong>Refresh data and forecast</strong>, which runs <code>python pipeline.py update</code> with <code>subprocess.run</code> behind a spinner, then clears the cache and reruns. On failure it shows the error output.</li>
+</ul>
+</li>
+</ul>
+<h3 id="14-4-header">14.4 Header</h3>
+<ol>
+<li>A demo-mode notice, if relevant.</li>
+<li><strong>Calculations:</strong><ul>
+<li><code>last_obs_t</code> and <code>last_obs</code> from the real readings</li>
+<li><code>lag_h</code>: how stale they are</li>
+<li><code>alert = alert_summary(...)</code>, <code>up = upcoming(...)</code>, <code>daily = daily_outlook(...)</code></li>
+<li><strong>AQI now</strong> = sub-index of the mean of the <strong>last 24 available hours</strong> (bridge estimates included if the station is offline)</li>
+</ul>
+</li>
+<li><code>ui.hero(...)</code>: the city, station and how long ago it reported; the AQI as a large coloured number; the warning chip and message; the <strong>48-hour colour strip</strong> from the forecast median, with white ticks on hours above the threshold; and the health advice for the peak.</li>
+<li><strong>Warnings:</strong><ul>
+<li>bridged outage → "estimated from CAMS × ratio"</li>
+<li>stale data (more than 12 h) → a warning</li>
+<li>a forecast entirely in the past → an error explaining that Refresh will bridge the gap</li>
+</ul>
+</li>
+<li><strong>Four tiles</strong> (<code>ui.tiles</code>): last reading; peak in the next 24 h; peak in 24–48 h; tomorrow's 24-h mean with the chance of breaching the national limit.</li>
+</ol>
+<h3 id="14-5-tabs">14.5 Tabs</h3>
+<p><strong><code>add_category_bands(fig, ymax)</code></strong> draws light horizontal bands for the CPCB categories behind a chart, with labels. Several charts use it.</p>
+<table>
+<thead>
+<tr>
+<th>Tab</th>
+<th>Content and how it's built</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Forecast</strong></td>
+<td>Measured PM2.5 for the last 96 h (solid), bridge estimates (dotted), the forecast median (blue) with the q10–q90 band (<code>fill="tonexty"</code> between two traces), CAMS (grey dotted), the threshold line, a "now" line and category bands. Below: an hourly <strong>exceedance-probability bar chart</strong> (red ≥ 60 %, amber ≥ 30 %)</td>
+</tr>
+<tr>
+<td><strong>Plan your day</strong></td>
+<td>Day cards from <code>daily_outlook</code>; the <strong>best outdoor window</strong> per day from <code>best_windows</code>, with how much cleaner it is than the worst slot; an hour-by-hour table; <strong>CSV download</strong> (<code>st.download_button</code>)</td>
+</tr>
+<tr>
+<td><strong>Why</strong></td>
+<td>Grouped horizontal bars of the driver effects (next 24 h vs 24–48 h) plus plain sentences; a <strong>ventilation-index</strong> line with the stagnant zone (&lt; 2,000 m²/s) shaded and rain bars on a second axis; the top 12 <strong>permutation importances</strong> with a key to the prefixes</td>
+</tr>
+<tr>
+<td><strong>Track record</strong></td>
+<td>Error tiles (0–24 h, 24–48 h, skill against persistence and CAMS, band coverage); <strong>MAE by lead time</strong> for the model and the three baselines; warning verification table (POD, FAR, CSI, Brier); <strong>reliability diagram</strong> (marker size ∝ √n); last 30 days of test forecasts against measurements, for a selectable lead time</td>
+</tr>
+<tr>
+<td><strong>Patterns</strong></td>
+<td><strong>Heatmap</strong> of mean PM2.5 by local hour × month; <strong>pollution rose</strong>: wind direction binned into 8 sectors with <code>((dir + 22.5) // 45) % 8</code>, mean PM2.5 per sector on a <code>Barpolar</code> chart, showing where dirty air comes from; days per month with a 24-h mean above 60; <strong>weekday effect</strong>; the data-quality JSON</td>
+</tr>
+<tr>
+<td><strong>Compared with weather apps</strong></td>
+<td>The gap table (section 2.4)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="15-aq-demo-py-synthetic-data-for-offline-demos">15. <code>aq/demo.py</code>: synthetic data for offline demos</h2>
+<p><strong><code>_ar1(n, phi, sigma, rng)</code></strong> generates an AR(1) noise process, $x_t = \phi x_{t-1} + \varepsilon_t$. This is realistic "weather-like" persistence: random, but correlated over time.</p>
+<p><strong><code>make_demo(start, end=None, seed=7)</code></strong> builds a physically motivated world from the start date to now + 4 days, with a fixed random seed.</p>
+<p><strong>Seasonality:</strong></p>
+<ul>
+<li><code>winter = cos(2π(doy − 15)/365.25)</code>, which is +1 in mid-January and −1 in mid-July</li>
+<li>a monsoon flag for June–September</li>
+<li>a daylight curve from 07:00 to 18:00 local time</li>
+</ul>
+<p><strong>Weather:</strong></p>
+<ul>
+<li>temperature, humidity, dew point</li>
+<li>wind (stronger by day and in the monsoon)</li>
+<li>wind direction (north-west in winter, south-west in the monsoon)</li>
+<li>rain (Poisson-like events, frequent in the monsoon)</li>
+<li>cloud, radiation</li>
+<li>mixing height (deep on sunny days, shallow at night and in winter)</li>
+<li>pressure</li>
+</ul>
+<p><strong>A stagnation spell is planted 16–64 h after now:</strong> wind and mixing height are cut, rain is removed, the wind turns north-west, and local burning increases. This gives the demo something to warn about.</p>
+<p><strong>PM2.5 dynamics:</strong></p>
+<p>$$\text{target} = 38 \cdot \text{season} \cdot \text{traffic} \cdot \text{ventilation factor} \cdot \text{transport} \cdot \text{episode} \cdot e^{\text{noise}}$$</p>
+<table>
+<thead>
+<tr>
+<th>Factor</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Traffic</td>
+<td>Morning and evening peaks (Gaussian bumps at 09:30 and 21:00) and a Sunday dip</td>
+</tr>
+<tr>
+<td>Ventilation factor</td>
+<td>(median ventilation ÷ ventilation)^0.35: low ventilation means more pollution</td>
+</tr>
+<tr>
+<td>Transport</td>
+<td>+25 % when winter winds come from the north-west</td>
+</tr>
+<tr>
+<td>Episodes</td>
+<td>Random 1–4-day burning episodes from October to February</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Then:</strong></p>
+<ul>
+<li><strong>Smoothing:</strong> <code>pm[t] = (0.82·pm[t−1] + 0.18·target[t]) · (1 − washout)</code>, so pollution builds and decays gradually, and rain removes up to 50 %.</li>
+<li><strong>CAMS-like series:</strong> the truth smoothed, lagged 4 h, biased low and noisy, plus 6. This imitates a coarse model.</li>
+<li><strong>Station:</strong> reports up to 2 h ago, with about 3 % random gaps.</li>
+</ul>
+<blockquote>
+<p>Demo scores are optimistic, because the data obey the model's assumptions exactly. <strong>Never report demo results.</strong></p>
+</blockquote>
+<hr />
+<h2 id="16-files-the-system-produces-data-contracts">16. Files the system produces (data contracts)</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Written by</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data/kolkata/raw/sensors.csv</code></td>
+<td><code>fetch</code></td>
+<td>Candidate sensors: <code>sensor_id, location_id, location, provider, is_monitor, lat, lon, distance_m, first, last, active, years</code></td>
+</tr>
+<tr>
+<td><code>data/kolkata/raw/pm25_location_&lt;id&gt;.csv</code></td>
+<td><code>_fetch_location</code></td>
+<td>The station's joined hourly series: <code>time, pm25, coverage, sensor_id</code></td>
+</tr>
+<tr>
+<td><code>data/kolkata/raw/weather_history.csv</code></td>
+<td><code>fetch</code></td>
+<td>Archived hourly weather (renamed columns, UTC)</td>
+</tr>
+<tr>
+<td><code>data/kolkata/raw/cams_history.csv</code></td>
+<td><code>fetch</code></td>
+<td><code>time, cams_pm25</code></td>
+</tr>
+<tr>
+<td><code>data/kolkata/processed/hourly.csv</code></td>
+<td><code>fetch</code></td>
+<td><strong>The master table</strong>: <code>time</code> (UTC), <code>pm25</code>, 11 weather columns, <code>cams_pm25</code>, <code>pm25_bridge</code>. About 4 days of future rows (weather and CAMS only)</td>
+</tr>
+<tr>
+<td><code>data/kolkata/processed/meta.json</code></td>
+<td><code>fetch</code></td>
+<td><code>mode, city, station, sensor_id[], location_id, provider, lat, lon, tz, qc{…}, fetched_at, freshness{last_observation, gap_hours, bridged, bridge_ratio, …}, last_observation</code></td>
+</tr>
+<tr>
+<td><code>models/kolkata/pm25_quantile_gbm.joblib</code></td>
+<td><code>train</code></td>
+<td>Bundle: <code>models{0.1,0.5,0.9}, cols, scale, blend, version, climatology, trained_until, city</code></td>
+</tr>
+<tr>
+<td><code>reports/kolkata/backtest.json</code></td>
+<td><code>train</code></td>
+<td><code>by_horizon[]</code>, <code>summary_0-24h</code>, <code>summary_24-48h</code>, <code>alerts{60,90,120}</code>, <code>reliability[]</code>, <code>interval_scale</code>, <code>blend_weight</code>, <code>period</code>, <code>importance</code></td>
+</tr>
+<tr>
+<td><code>reports/kolkata/backtest_predictions.csv</code></td>
+<td><code>train</code></td>
+<td>Test-period forecasts at h ∈ {1,3,6,12,24,36,48}: <code>issue_time, target_time, h, y, q10, q50, q90, c_cams, p_pm, p_same_hour</code></td>
+</tr>
+<tr>
+<td><code>reports/kolkata/forecast.csv</code></td>
+<td><code>forecast</code></td>
+<td>60 rows: <code>issue_time, target_time, h, cams, q10, q50, q90</code></td>
+</tr>
+<tr>
+<td><code>reports/kolkata/drivers.csv</code></td>
+<td><code>forecast</code></td>
+<td><code>driver, effect_next24h, effect_24_48h</code> (µg/m³)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="17-evaluation-and-results">17. Evaluation and results</h2>
+<h3 id="17-1-kolkata-padmapukur-howrah-station-forecasts-issued-april-september-2026">17.1 Kolkata (Padmapukur, Howrah station), forecasts issued April–September 2026</h3>
+<p>These scores come from re-training on the project's downloaded Kolkata data. MAE is in µg/m³; lower is better.</p>
+<table>
+<thead>
+<tr>
+<th>Lead time</th>
+<th>1 h</th>
+<th>3 h</th>
+<th>6 h</th>
+<th>12 h</th>
+<th>24 h</th>
+<th>36 h</th>
+<th>48 h</th>
+<th>60 h</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Model</strong></td>
+<td><strong>1.62</strong></td>
+<td><strong>2.65</strong></td>
+<td><strong>3.39</strong></td>
+<td><strong>3.86</strong></td>
+<td><strong>4.15</strong></td>
+<td><strong>4.35</strong></td>
+<td><strong>4.39</strong></td>
+<td><strong>4.56</strong></td>
+</tr>
+<tr>
+<td>Persistence</td>
+<td>1.64</td>
+<td>2.84</td>
+<td>4.11</td>
+<td>5.01</td>
+<td>4.90</td>
+<td>5.74</td>
+<td>5.98</td>
+<td>6.66</td>
+</tr>
+<tr>
+<td>Same hour yesterday</td>
+<td>4.71</td>
+<td>4.81</td>
+<td>4.83</td>
+<td>4.86</td>
+<td>4.90</td>
+<td>5.77</td>
+<td>5.98</td>
+<td>6.42</td>
+</tr>
+<tr>
+<td>CAMS</td>
+<td>12.08</td>
+<td>12.03</td>
+<td>12.27</td>
+<td>12.73</td>
+<td>12.78</td>
+<td>13.51</td>
+<td>13.29</td>
+<td>14.05</td>
+</tr>
+<tr>
+<td>80 % band coverage</td>
+<td>0.80</td>
+<td>0.81</td>
+<td>0.79</td>
+<td>0.79</td>
+<td>0.80</td>
+<td>0.81</td>
+<td>0.81</td>
+<td>0.82</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Summary:</strong></p>
+<ul>
+<li><strong>0–24 h:</strong> MAE 3.6 against 4.4 for persistence, a skill of <strong>+18 %</strong>.</li>
+<li><strong>24–48 h:</strong> MAE 4.4 against 5.7 for persistence (skill <strong>+24 %</strong>) and 13.3 for CAMS (<strong>about 3× better</strong>).</li>
+</ul>
+<p><strong>Learned blend weights</strong>, the trust in the model's predicted change: 0.15 at 1 h, 0.35 at 2–3 h, 0.6 at 4–6 h, 0.7 at 7–12 h, 0.9 at 13–36 h, 1.0 from 37 h onwards.</p>
+<p><strong>Most important inputs:</strong></p>
+<ol>
+<li><code>c_cams_change</code> (incoming regional change)</li>
+<li><code>p_mean72</code> (how far the current level is from the 3-day mean, i.e. reversion toward it)</li>
+<li><code>w_wind_u</code> (east–west wind)</li>
+<li><code>d_temp</code></li>
+<li><code>w_dewpoint</code></li>
+<li>hour of day</li>
+<li><code>p_mean24</code></li>
+<li><code>w_wind12</code></li>
+<li><code>w_dtemp24</code></li>
+<li><code>p_same_hour</code></li>
+</ol>
+<h3 id="17-2-how-to-read-these-results">17.2 How to read these results</h3>
+<ul>
+<li><strong>At 1 hour the model equals persistence.</strong> This is expected and correct, because the blend weight is small there. Nothing beats "it's about what it was an hour ago".</li>
+<li><strong>The model's advantage grows with lead time.</strong> Persistence errors grow quickly, while the model uses forecast weather and CAMS's expected change.</li>
+<li><strong>CAMS has a large constant bias at this station.</strong> That is exactly what a station-anchored model removes.</li>
+<li><strong>Warning scores (POD/FAR) are not meaningful for this test period.</strong> Summer and monsoon had only a handful of hours above 60 µg/m³. Retrain after winter (November–February), when most exceedances occur, to evaluate the warnings properly.</li>
+<li><strong>Your exact numbers will change after every retrain.</strong> The Track record tab always shows the current ones.</li>
+</ul>
+<hr />
+<h2 id="18-design-decisions-and-the-bugs-that-shaped-them">18. Design decisions and the bugs that shaped them</h2>
+<p>These came up while running the project on real data, and each one is worth knowing for a viva.</p>
+<table>
+<thead>
+<tr>
+<th>Problem seen</th>
+<th>Root cause</th>
+<th>Fix (where)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TypeError: cannot interpolate with object dtype</code> during fetch</td>
+<td>Open-Meteo returned JSON <code>null</code> for a variable over part of the archive, which made a text (object) column</td>
+<td>Force numeric in <code>_request</code>; coerce again in <code>merge_sources</code>; always create weather feature columns</td>
+</tr>
+<tr>
+<td>Dashboard crashed: <code>vectorize on size 0 inputs</code></td>
+<td>All Kolkata stations on OpenAQ stopped reporting on 29 Sep, so the 60-h forecast lay entirely in the past and the probability function got an empty array</td>
+<td><code>otypes=[float]</code> and an empty-input guard in <code>_norm_cdf</code>; <strong><code>bridge_gap</code></strong> fills outages with an estimate; dashboard warnings</td>
+</tr>
+<tr>
+<td>Model <strong>worse than persistence</strong> on real data</td>
+<td>Absolute-level target plus day-of-year let the model memorise 2025 levels; 2026 was about 35 % cleaner</td>
+<td><strong>Predict the change from now</strong>, use scale-free features, drop day-of-year, blend with persistence (sections 9.6–9.7)</td>
+</tr>
+<tr>
+<td>A station build failed with an empty PM2.5 series (<code>NaT</code>)</td>
+<td>The chosen sensor ID was the station's <strong>old</strong> ID with no recent data</td>
+<td>Treat the <strong>station</strong> as the unit, join all its sensor IDs, try the next station if the data are insufficient (<code>_fetch_location</code>, <code>_station_pm25</code>)</td>
+</tr>
+<tr>
+<td>Deprecation warning <code>use_container_width</code></td>
+<td>Streamlit 1.4x+ renamed it</td>
+<td><code>width="stretch"</code>; <code>streamlit&gt;=1.64</code> in <code>requirements.txt</code></td>
+</tr>
+</tbody>
+</table>
+<p>Further deliberate decisions:</p>
+<ul>
+<li><strong>Train on archived forecasts, not reanalysis.</strong> Training inputs then match live inputs (section 4.2).</li>
+<li><strong>One model with h as a feature</strong>, not 60 models and not a recursive model (section 9.1).</li>
+<li><strong>Quantiles plus conformal calibration</strong>, rather than a point forecast. Warnings need probabilities.</li>
+<li><strong>Interpolate only gaps of up to 3 h.</strong> The trees handle missing values, so longer gaps are never invented.</li>
+<li><strong>A 60-h horizon.</strong> It absorbs station reporting delays and still gives a full 48 h from now.</li>
+<li><strong>Automatic, sticky station choice.</strong> The best reporting reference monitor is picked once and then kept, so the training history stays consistent.</li>
+</ul>
+<hr />
+<h2 id="19-limitations-and-possible-extensions">19. Limitations and possible extensions</h2>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li>Forecast weather contains errors that grow after about 48 h, and the model inherits them.</li>
+<li>Sudden local sources (firecrackers, a nearby fire, construction dust) aren't in the inputs. The uncertainty band and trend features help only once a build-up has started.</li>
+<li>Kolkata is represented by <strong>one station</strong>, not a city-wide average or map.</li>
+<li>Only a few years of history per station. Seasonal patterns are seen only 2–3 times.</li>
+<li>The daily band (an average of hourly quantiles) is conservative.</li>
+</ul>
+<p><strong>Already built in the full version of the project</strong> (left out of this checkpoint build): any city in India and searched places, a city comparison map, choosing the station from the dashboard, and Telegram / e-mail alert notifications.</p>
+<p><strong>Further extensions</strong> (good for a report or future work):</p>
+<ol>
+<li><strong>Multiple stations or a spatial model:</strong> forecast every station and interpolate (kriging, or a graph neural network over stations) to produce a city map.</li>
+<li><strong>Fire hotspots</strong> (NASA FIRMS) upwind for the stubble-burning season; <strong>festival flags</strong> (Diwali); a traffic proxy.</li>
+<li><strong>Model comparison:</strong> LightGBM/XGBoost, Random Forest, LSTM/GRU, Temporal Fusion Transformer, all on the same backtest.</li>
+<li><strong>SHAP values</strong> for exact attribution of each individual forecast.</li>
+<li><strong>More pollutants</strong> (PM10, NO₂, O₃, CO) for a complete CPCB AQI.</li>
+<li><strong>Probabilistic daily aggregation</strong> by simulation instead of quantile averaging.</li>
+<li><strong>Deployment:</strong> Streamlit Community Cloud plus a scheduled <code>update --all-cities</code> (GitHub Actions or Task Scheduler).</li>
+<li><strong>Automatic retraining</strong> when the error in recent weeks drifts upward.</li>
+</ol>
+<hr />
+<h2 id="20-glossary">20. Glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PM2.5</strong></td>
+<td>Mass of particles smaller than 2.5 µm per cubic metre of air (µg/m³)</td>
+</tr>
+<tr>
+<td><strong>AQI (CPCB)</strong></td>
+<td>India's Air Quality Index, 0–500. Each pollutant's 24-h mean is converted with breakpoints and the highest sub-index is reported</td>
+</tr>
+<tr>
+<td><strong>NAAQS</strong></td>
+<td>India's National Ambient Air Quality Standards. For PM2.5: 60 µg/m³ as a 24-h mean</td>
+</tr>
+<tr>
+<td><strong>CPCB / SPCB</strong></td>
+<td>Central / State Pollution Control Board, the operators of India's official monitors</td>
+</tr>
+<tr>
+<td><strong>OpenAQ</strong></td>
+<td>A non-profit platform that collects and serves air-quality data from governments and other sources</td>
+</tr>
+<tr>
+<td><strong>Location vs sensor</strong></td>
+<td>An OpenAQ <em>location</em> is a monitoring site; a <em>sensor</em> is one parameter there, and can have more than one ID</td>
+</tr>
+<tr>
+<td><strong>CAMS</strong></td>
+<td>Copernicus Atmosphere Monitoring Service, a global atmospheric-composition model run by ECMWF</td>
+</tr>
+<tr>
+<td><strong>ERA5</strong></td>
+<td>ECMWF's global reanalysis: best-estimate historical weather</td>
+</tr>
+<tr>
+<td><strong>Boundary layer / mixing height (BLH)</strong></td>
+<td>The lowest part of the atmosphere, mixed by turbulence. Pollution spreads within it. Low at night and in winter</td>
+</tr>
+<tr>
+<td><strong>Inversion</strong></td>
+<td>Warm air above cool surface air, acting like a lid that traps pollution</td>
+</tr>
+<tr>
+<td><strong>Ventilation index</strong></td>
+<td>Wind speed × mixing height; low values mean stagnant air</td>
+</tr>
+<tr>
+<td><strong>Wet deposition</strong></td>
+<td>Rain removing particles from the air</td>
+</tr>
+<tr>
+<td><strong>Issue time (T) / lead time (h)</strong></td>
+<td>When a forecast is made, and how many hours ahead it looks</td>
+</tr>
+<tr>
+<td><strong>Persistence</strong></td>
+<td>The baseline forecast "future = latest observation"</td>
+</tr>
+<tr>
+<td><strong>Direct multi-horizon</strong></td>
+<td>One model predicts every lead time, with h as an input</td>
+</tr>
+<tr>
+<td><strong>GBDT</strong></td>
+<td>Gradient-boosted decision trees: an additive ensemble of small trees, each fitted to the errors of the previous ones</td>
+</tr>
+<tr>
+<td><strong>Quantile / pinball loss</strong></td>
+<td>A loss whose minimiser is a chosen percentile, used to forecast uncertainty bands</td>
+</tr>
+<tr>
+<td><strong>log1p / expm1</strong></td>
+<td>log(1 + x) and its inverse; safe at zero</td>
+</tr>
+<tr>
+<td><strong>Skill score</strong></td>
+<td>1 − error(model) / error(baseline). Above 0 means better than the baseline</td>
+</tr>
+<tr>
+<td><strong>MAE / RMSE</strong></td>
+<td>Mean absolute error / root mean squared error</td>
+</tr>
+<tr>
+<td><strong>Coverage</strong></td>
+<td>The share of outcomes inside a forecast interval; should match the nominal level (80 %)</td>
+</tr>
+<tr>
+<td><strong>Conformal calibration</strong></td>
+<td>Rescaling intervals on held-out data so their coverage is correct</td>
+</tr>
+<tr>
+<td><strong>POD / FAR / CSI</strong></td>
+<td>Warning verification: probability of detection, false-alarm ratio, critical success index</td>
+</tr>
+<tr>
+<td><strong>Brier score</strong></td>
+<td>Mean squared error of probability forecasts</td>
+</tr>
+<tr>
+<td><strong>Reliability diagram</strong></td>
+<td>Forecast probability against observed frequency; a calibrated forecast lies on the diagonal</td>
+</tr>
+<tr>
+<td><strong>Permutation importance</strong></td>
+<td>The drop in accuracy when one feature is randomly shuffled</td>
+</tr>
+<tr>
+<td><strong>Counterfactual attribution</strong></td>
+<td>Re-running the model with one factor set to "typical" to measure its effect</td>
+</tr>
+<tr>
+<td><strong>Data leakage</strong></td>
+<td>Accidentally using information from the future during training, which makes scores look too good</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="21-likely-viva-questions-with-answers">21. Likely viva questions, with answers</h2>
+<p><strong>Q1. Why did you use gradient boosting rather than a neural network such as an LSTM?</strong></p>
+<ul>
+<li>The data are tabular, about 50 heterogeneous features and a few hundred thousand rows. On this kind of data gradient-boosted trees are consistently as good as or better than deep networks, train in about a minute on a CPU, need little tuning, handle missing values natively, support quantile loss directly, and are easy to explain.</li>
+<li>An LSTM would need more data per station, normalisation, careful tuning and usually a GPU, with no evidence of better accuracy here.</li>
+<li>I list it as an extension for comparison.</li>
+</ul>
+<p><strong>Q2. Why one model for all 60 horizons instead of a recursive model?</strong></p>
+<ul>
+<li>Recursive models feed their own predictions back in, so errors compound over 60 steps.</li>
+<li>Making h a feature lets one model learn how relationships change with lead time and share data across horizons.</li>
+<li>There is no compounding, and the forecast curve is smooth.</li>
+</ul>
+<p><strong>Q3. How do you make sure there is no data leakage?</strong></p>
+<ul>
+<li>The split is by time: training rows must have their <em>target</em> time before the cut-off, and test rows have their <em>issue</em> time after it.</li>
+<li>Every feature at issue time T uses data up to T only:<ul>
+<li>rolling windows look backwards</li>
+<li>"same hour yesterday" is taken from a day already observed</li>
+<li>weather at T+h comes from forecasts, which are known in advance</li>
+</ul>
+</li>
+<li>Calibration and scoring use different weeks.</li>
+</ul>
+<p><strong>Q4. Why train on archived weather forecasts instead of observed weather?</strong></p>
+<ul>
+<li>Live predictions use forecast weather, which has errors.</li>
+<li>Training on archived forecasts teaches the model to cope with those errors. Training on perfect hindsight weather would make it over-confident.</li>
+</ul>
+<p><strong>Q5. Your first model lost to persistence. What did you learn?</strong></p>
+<ul>
+<li>Absolute-level models tied to the season memorised last year's levels. Kolkata's 2026 summer was about 35 % cleaner, so the forecasts were biased upward by about 24 %.</li>
+<li>Predicting the <strong>change</strong> from the current reading, with features relative to now, removed the bias.</li>
+<li>The model then beat persistence by 18–24 % and CAMS by about 3×.</li>
+<li>The lesson is that a model must be anchored to the most reliable current information, and that you should always compare against simple baselines.</li>
+</ul>
+<p><strong>Q6. How do you get a probability from a regression model?</strong></p>
+<ul>
+<li>Three quantile models give the 10th, 50th and 90th percentiles.</li>
+<li>Conformal scaling on held-out data corrects the band so that 80 % of outcomes fall inside it.</li>
+<li>A split-normal distribution in log space, fitted through the three quantiles, gives P(PM &gt; threshold) for any threshold.</li>
+<li>The reliability diagram checks it.</li>
+</ul>
+<p><strong>Q7. What does the conformal step actually do?</strong></p>
+<ul>
+<li>For each held-out case it measures how many half-widths the truth was from the median.</li>
+<li>For each lead-time bucket it takes the 80th percentile of that score as a scale factor and stretches the band by it.</li>
+<li>Coverage then becomes about 80 % by construction (0.79–0.82 observed).</li>
+</ul>
+<p><strong>Q8. Why blend with persistence?</strong></p>
+<ul>
+<li>At 1–3 hours ahead the latest reading is almost unbeatable, and the model's small predicted changes add noise.</li>
+<li>A weight for each lead time, chosen on held-out data, shrinks the predicted change: about 0.15 at 1 h, rising to 1.0 by 37 h.</li>
+<li>The result is never worse than persistence, and the model's skill grows with lead time.</li>
+</ul>
+<p><strong>Q9. Why is the ventilation index important?</strong></p>
+<ul>
+<li>Pollution concentration ≈ emissions ÷ the volume of air they mix into, per unit time.</li>
+<li>Wind speed × mixing height measures that ventilation.</li>
+<li>Low ventilation, typical of winter nights, traps pollution. This is the main physical reason winter episodes happen.</li>
+</ul>
+<p><strong>Q10. How do you explain a specific forecast?</strong></p>
+<ul>
+<li>For each weather group, the model is re-run with that group's inputs set to their typical value for that month and hour.</li>
+<li>The difference is the group's contribution in µg/m³, for example "low wind +23 µg/m³ tomorrow night".</li>
+<li>Globally, permutation importance ranks the inputs.</li>
+</ul>
+<p><strong>Q11. What happens when the station stops reporting?</strong></p>
+<ul>
+<li>For gaps of 6 h to 14 days, the missing hours are estimated as CAMS × the station/CAMS ratio over the last week, so forecasts still start from now.</li>
+<li>The estimates are flagged, shown dotted, and never used for training.</li>
+<li>Beyond 14 days, the warning tells the user the station has been offline too long, and the next <code>fetch</code> tries other stations automatically.</li>
+</ul>
+<p><strong>Q12. How is the station chosen?</strong></p>
+<ol>
+<li>Rank all PM2.5 monitors within 25 km: active, reference-grade, long history, close.</li>
+<li>Join all sensor IDs of a station.</li>
+<li>Accept the first station with at least 30 days of data and a reading within 14 days; keep using the same station later.</li>
+</ol>
+<p><strong>Q13. What is the AQI and how do you compute it?</strong></p>
+<ul>
+<li>CPCB's index converts each pollutant's 24-h mean concentration into a sub-index by linear interpolation between breakpoints.</li>
+<li>For PM2.5, 0–30 maps to AQI 0–50, 30–60 to 51–100, and so on.</li>
+<li>The overall AQI is the highest sub-index. We use PM2.5 and PM10.</li>
+</ul>
+<p><strong>Q14. What does the project offer that Google Weather doesn't?</strong></p>
+<ul>
+<li>A station-anchored ML forecast that is about 3× more accurate than the model behind such apps.</li>
+<li>Uncertainty bands and probabilities.</li>
+<li>Early warnings with lead time and duration, and personal thresholds.</li>
+<li>Indian standards.</li>
+<li>Explanations of why air will be bad.</li>
+<li>The best time to go out, and health equivalents.</li>
+<li>A published accuracy record and local pattern analytics.</li>
+</ul>
+<p><strong>Q15. How would you scale this to all of India?</strong></p>
+<ul>
+<li>Make the city a setting and run the pipeline per station on a schedule (downloads are already incremental). The full version of this project already supports many cities.</li>
+<li>Store the data in a database instead of CSVs.</li>
+<li>Serve forecasts through an API.</li>
+<li>Use a spatial model (kriging or a graph neural network) to fill the gaps between stations.</li>
+<li>Retrain monthly, and alert when accuracy drifts.</li>
+</ul>
+<p><strong>Q16. What are the main limitations?</strong></p>
+<ul>
+<li>Inherited weather-forecast errors.</li>
+<li>No information about sudden local sources.</li>
+<li>One station per city.</li>
+<li>Only a few years of data.</li>
+<li>Warning scores still need a winter season to be validated.</li>
+</ul>
+</main>
+</div>
+<div class="toolbar"><button id="theme" type="button">Dark mode</button><button type="button" onclick="window.print()">Print / PDF</button></div>
+<script>
+// highlight the current section in the contents and open its sub-list
+const links = [...document.querySelectorAll('nav a')];
+const byId = Object.fromEntries(links.map(a => [decodeURIComponent(a.hash.slice(1)), a]));
+const heads = [...document.querySelectorAll('main h2[id], main h3[id]')];
+function mark() {
+  let cur = heads[0];
+  for (const h of heads) { if (h.getBoundingClientRect().top < 120) cur = h; }
+  links.forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('nav li.open').forEach(li => li.classList.remove('open'));
+  const a = cur && byId[cur.id];
+  if (a) { a.classList.add('active'); let li = a.closest('li');
+    while (li) { li.classList.add('open'); li = li.parentElement.closest('li'); } }
+}
+document.addEventListener('scroll', mark, {passive:true}); mark();
+const btn = document.getElementById('theme');
+function setTheme(t) { document.documentElement.dataset.theme = t; btn.textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
+  try { localStorage.setItem('walkthrough-theme', t); } catch(e) {} }
+let saved = null; try { saved = localStorage.getItem('walkthrough-theme'); } catch(e) {}
+setTheme(saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+btn.onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+</script>
+</body></html>
