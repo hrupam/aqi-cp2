@@ -7,6 +7,8 @@ It downloads real monitoring-station readings from **OpenAQ** and combines them 
 > **This is the checkpoint-2 build.** It covers Kolkata only. The monitoring station is chosen automatically, and the warnings are shown in the dashboard. Other cities, choosing the station by hand, and Telegram/e-mail notifications belong to the full version and are not part of this build.
 >
 > A complete explanation of every file, function and modelling choice is in **`docs/CODE_WALKTHROUGH.html`** (open it in a browser). The same content is in `docs/CODE_WALKTHROUGH.md`.
+>
+> New to air-quality science? **`docs/CHART_GUIDE.html`** explains every chart in the dashboard from scratch: PM2.5, AQI, mixing height, wind, Kolkata's seasons. It also has a short demo script.
 
 ---
 
@@ -167,6 +169,8 @@ aqews-kolkata/
 ├── docs/
 │   ├── CODE_WALKTHROUGH.html   Full project and code walkthrough (open in a browser)
 │   ├── CODE_WALKTHROUGH.md     Same content in Markdown
+│   ├── CHART_GUIDE.html        Every chart explained for beginners (with screenshots)
+│   ├── CHART_GUIDE.md          Same content in Markdown (images in chart_guide_images/)
 │   └── src/                    Section files + build.py (python docs/src/build.py rebuilds both)
 ├── data/kolkata/           Downloaded and processed data   (created on first run)
 ├── models/kolkata/         Trained model                   (created on first run)

@@ -306,7 +306,14 @@ with tabs[3]:
             c1.plotly_chart(figr, width="stretch")
         if btp is not None:
             hsel = c2.selectbox("Lead time to inspect", sorted(btp.h.unique()), index=min(4, btp.h.nunique() - 1))
-            s = btp[btp.h == hsel].sort_values("target_time").tail(24 * 30)
+            s = btp[btp.h == hsel].sort_values("target_time")
+            s = s[s.target_time >= s.target_time.max() - pd.Timedelta(days=30)]
+            # the scored weeks alternate with calibration weeks: break the lines across the gaps
+            gap = s.target_time.diff() > pd.Timedelta(hours=12)
+            if gap.any():
+                fill = s[gap].assign(target_time=s[gap].target_time - pd.Timedelta(hours=1),
+                                     y=np.nan, q10=np.nan, q50=np.nan, q90=np.nan)
+                s = pd.concat([s, fill]).sort_values("target_time")
             figb = go.Figure()
             figb.add_trace(go.Scatter(x=s.target_time, y=s.q90, line=dict(width=0), showlegend=False))
             figb.add_trace(go.Scatter(x=s.target_time, y=s.q10, fill="tonexty", line=dict(width=0),
@@ -338,7 +345,8 @@ with tabs[4]:
         figr = go.Figure(go.Barpolar(r=rose.values, theta=names, marker_color=rose.values,
                                      marker_colorscale="YlOrRd"))
         figr.update_layout(height=420, title="Pollution rose: mean PM2.5 by wind direction (where dirty air comes from)",
-                           margin=dict(t=60))
+                           margin=dict(t=60),
+                           polar=dict(angularaxis=dict(rotation=90, direction="clockwise")))   # compass: N up, E right
         c2.plotly_chart(figr, width="stretch")
 
     daily_obs = h.pm25.resample("D").mean()
