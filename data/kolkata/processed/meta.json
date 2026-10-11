@@ -1,0 +1,34 @@
+{
+  "mode": "live",
+  "city": "Kolkata",
+  "station": "Padmapukur, Howrah - WBPCB",
+  "sensor_id": [
+    14883,
+    12234975
+  ],
+  "location_id": 5614,
+  "provider": "CPCB",
+  "lat": 22.5687319,
+  "lon": 88.2797276,
+  "tz": "Asia/Kolkata",
+  "qc": {
+    "raw_hours": 12908,
+    "out_of_range": 14,
+    "low_coverage": 197,
+    "stuck_values": 34,
+    "spikes": 5,
+    "grid_hours": 14299,
+    "gaps_filled": 538,
+    "still_missing": 1084,
+    "completeness_pct": 92.4
+  },
+  "fetched_at": "2026-10-11 18:31:18.443051+00:00",
+  "freshness": {
+    "last_observation": "2026-10-07 13:00:00+00:00",
+    "gap_hours": 101.0,
+    "bridged": true,
+    "bridge_ratio": 0.9880191364519499,
+    "bridged_until": "2026-10-11 18:00:00+00:00"
+  },
+  "last_observation": "2026-10-07 13:00:00+00:00"
+}

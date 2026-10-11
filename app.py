@@ -338,10 +338,11 @@ with tabs[4]:
                        margin=dict(t=40))
     c1.plotly_chart(figh, width="stretch")
 
-    if "wind_dir" in h:
-        h["sector"] = ((h.wind_dir + 22.5) // 45 % 8).astype(int)
+    if "wind_dir" in h and h["wind_dir"].notna().any():
+        hw = h.dropna(subset=["wind_dir"])                  # hours without weather data can't be placed
+        sector = ((hw.wind_dir + 22.5) // 45 % 8).astype(int)
         names = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
-        rose = h.groupby("sector").pm25.mean().reindex(range(8))
+        rose = hw.pm25.groupby(sector).mean().reindex(range(8))
         figr = go.Figure(go.Barpolar(r=rose.values, theta=names, marker_color=rose.values,
                                      marker_colorscale="YlOrRd"))
         figr.update_layout(height=420, title="Pollution rose: mean PM2.5 by wind direction (where dirty air comes from)",

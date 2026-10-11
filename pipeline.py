@@ -79,6 +79,11 @@ def fetch(demo: bool = False, history: bool = True):
             ch = pd.read_csv(cfile, parse_dates=["time"])
             wh["time"] = pd.to_datetime(wh["time"], utc=True)
             ch["time"] = pd.to_datetime(ch["time"], utc=True)
+            # Top up the saved archive to two days ago. Without this, an update run several days
+            # after the last one leaves a gap between the archive and the 5 past days of the
+            # forecast API, i.e. hours with no weather or CAMS at all.
+            wh, ch = _top_up(wh, wfile, openmeteo.fetch_weather_history, hist_end), \
+                     _top_up(ch, cfile, openmeteo.fetch_cams_history, hist_end)
         print("[fetch] Open-Meteo latest weather + CAMS forecast")
         weather = _combine(wh, openmeteo.fetch_weather_forecast(config.LAT, config.LON))
         cams = _combine(ch, openmeteo.fetch_cams_forecast(config.LAT, config.LON))
@@ -104,6 +109,25 @@ def fetch(demo: bool = False, history: bool = True):
     _save_hourly(df, meta)
     print(f"[fetch] {len(df):,} hourly rows -> {hourly_file().relative_to(config.ROOT)}  | QC: {qc}")
     return df
+
+
+def _top_up(hist: pd.DataFrame, path, fetcher, hist_end: str) -> pd.DataFrame:
+    """Append archive days missing between the saved history and `hist_end`, and save."""
+    start = (hist["time"].max() + pd.Timedelta(hours=1)).strftime("%Y-%m-%d") if not hist.empty \
+        else config.TRAIN_START
+    if start > hist_end:
+        return hist
+    print(f"[fetch] topping up saved history {start} -> {hist_end}")
+    try:
+        new = fetcher(config.LAT, config.LON, start, hist_end)
+    except Exception as e:                                  # keep going; the forecast API still covers 5 days
+        print(f"   could not top up history: {e}")
+        return hist
+    out = pd.concat([hist, new], ignore_index=True)
+    out["time"] = pd.to_datetime(out["time"], utc=True)
+    out = out.drop_duplicates("time", keep="last").sort_values("time").reset_index(drop=True)
+    out.to_csv(path, index=False)
+    return out
 
 
 def _fetch_location(openaq, loc_sensors: pd.DataFrame, history: bool) -> pd.DataFrame:
