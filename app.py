@@ -4,6 +4,7 @@ Kolkata PM2.5 Early Warning dashboard.     Run:  streamlit run app.py
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 
@@ -18,6 +19,20 @@ from aq.model import exceed_prob
 
 st.set_page_config(page_title="Kolkata PM2.5 Early Warning", page_icon="🌫️", layout="wide")
 ui.inject()
+
+
+def _pipeline_env() -> dict:
+    """Environment for the Refresh subprocess. Locally the key comes from .env; on Streamlit
+    Community Cloud it is stored in the app's Secrets, which a child process does not see
+    unless we pass it on explicitly."""
+    env = os.environ.copy()
+    try:
+        key = st.secrets.get("OPENAQ_API_KEY")
+    except Exception:                       # no secrets file at all (normal when running locally)
+        key = None
+    if key:
+        env["OPENAQ_API_KEY"] = str(key).strip()
+    return env
 
 
 # ------------------------------------------------------------------ cached loaders
@@ -65,7 +80,7 @@ with st.sidebar:
     if st.button("Refresh data and forecast"):
         args = [sys.executable, "pipeline.py", "update"] + (["--demo"] if meta.get("mode") == "demo" else [])
         with st.spinner("Downloading latest observations & weather forecast ..."):
-            r = subprocess.run(args, cwd=config.ROOT, capture_output=True, text=True)
+            r = subprocess.run(args, cwd=config.ROOT, capture_output=True, text=True, env=_pipeline_env())
         if r.returncode == 0:
             st.cache_data.clear()
             st.rerun()
